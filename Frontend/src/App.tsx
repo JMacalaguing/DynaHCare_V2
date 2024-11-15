@@ -6,27 +6,27 @@ import CreateformPage from "./pages/CreateformPage"
 import Sidebar from "./Components/Sidebar"
 import LoginPage from "./pages/LoginPage"
 
+import DashboardExample from "./pages/DashboardPage"
+import Createform from "./pages/CreateformPage"
+import FormPage from "./pages/FormPage"
+
 
 function App() {
   const location = useLocation();
+
   return (
     <div className="flex h-screen bg-gray-50 text-gray-100 overflow-hidden">
 
-      {/* BG */}
-      <div className=" fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-50 opacity-80"/>
-        <div className="absolute inset-0 backdrop-blur-sm"/>
-      </div>
-
       {/* Conditionally render Sidebar except on LoginPage */}
       {location.pathname !== '/' && <Sidebar />}
-      <Routes>
-        <Route path="/" element={<LoginPage />}></Route>
-        <Route path="/dashboardPage" element={<DashboardPage />}></Route>
-        <Route path="/patientPage" element={<PatientPage />}></Route>
-        <Route path="/consultationPage" element={<ConsultationPage />}></Route>
-        <Route path="/createForm" element={<CreateformPage />}></Route>
-      </Routes>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/dashboardPage" element={<DashboardExample />} />
+          <Route path="/patientPage" element={<PatientPage />} />
+          <Route path="/consultationPage" element={<ConsultationPage />} />
+          <Route path="/createForm" element={<Createform />} />
+          <Route path="/form" element={<FormPage />} />
+        </Routes>
     </div>
   )
 
