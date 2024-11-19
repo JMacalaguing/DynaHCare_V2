@@ -1,8 +1,7 @@
 import { Route, Routes, useLocation } from "react-router-dom"
-import DashboardPage from "./pages/DashboardPage"
 import PatientPage from "./pages/PatientPage"
+import PatientName from "./pages/PatientName"
 import ConsultationPage from "./pages/ConsultationPage"
-import CreateformPage from "./pages/CreateformPage"
 import Sidebar from "./Components/Sidebar"
 import LoginPage from "./pages/LoginPage"
 
@@ -20,12 +19,14 @@ function App() {
       {/* Conditionally render Sidebar except on LoginPage */}
       {location.pathname !== '/' && <Sidebar />}
         <Routes>
+
           <Route path="/" element={<LoginPage />} />
           <Route path="/dashboardPage" element={<DashboardExample />} />
           <Route path="/patientPage" element={<PatientPage />} />
           <Route path="/consultationPage" element={<ConsultationPage />} />
           <Route path="/createForm" element={<Createform />} />
           <Route path="/form" element={<FormPage />} />
+          <Route path="/child-care" element={<PatientName />} />
         </Routes>
     </div>
   )

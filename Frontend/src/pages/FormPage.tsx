@@ -24,7 +24,9 @@ const FormSchema = z.object({
   }),
   sectionname: z.string().min(8, {
     message: "Password must be at least 8 characters."
-  })
+  }),
+  label: z.string(),
+  type: z.string(),
 })
 
 const FormPage = () => {
@@ -32,7 +34,9 @@ const FormPage = () => {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       formname: "",
-      sectionname: ""
+      sectionname: "",
+      label: "",
+      type: ""
     },
   })
 
@@ -50,17 +54,17 @@ const FormPage = () => {
   return (
     <div className="w-full h-full flex flex-col gap-8 justify-center items-center text-black">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="w-2/3 space-y-6 flex flex-col justify-center">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="w-4/5 space-y-6 flex flex-col border-2 border-gray-400 rounded-lg p-7">
           <FormField
             control={form.control}
             name="formname"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Form Name</FormLabel>
+                <FormLabel className="text-xl">Form Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Immunization" {...field} />
+                  <Input placeholder="Immunization . . ." className="w-full h-12 text-md" {...field} />
                 </FormControl>
-                <FormDescription>
+                <FormDescription className="text-md">
                   This is your Form Name.
                 </FormDescription>
                 <FormMessage />
@@ -68,35 +72,35 @@ const FormPage = () => {
             )}
           />
           <Card>
-            <CardContent className="p-5 flex flex-col justify-center">
+            <CardContent className="p-7 flex flex-col justify-center">
               <FormField
                 control={form.control}
                 name="sectionname"
                 render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Section Name</FormLabel>
+                  <FormItem className="flex flex-col gap-3">
+                    <FormLabel className="text-xl">Section Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="section name" {...field} />
+                      <Input placeholder="Section Name . . ." className="w-full h-12" {...field} />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-md">
                       This is your Section Name.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <div className="flex justify-around">
+              <div className="flex justify-around my-4">
                 <FormField
                   control={form.control}
-                  name="sectionname"
+                  name="label"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
                       </FormLabel>
                       <FormControl>
                         <div className="flex">
-                          <div className="p-2 bg-[#040E46] text-white rounded-xl">Label</div>
-                          <Input placeholder="section name" className="border-l-0 border-t border-r border-b rounded-r-xl rounded-l-none" {...field} />
+                          <div className="p-2 bg-[#040E46] text-white rounded-xl w-auto h-12">Label</div>
+                          <Input placeholder="Label . . ." className="border-l-0 border-t border-r border-b rounded-r-xl rounded-l-none w-auto h-12 text-md" {...field} />
                         </div>
                       </FormControl>
                       <FormDescription>
@@ -108,15 +112,15 @@ const FormPage = () => {
                 />
                 <FormField
                   control={form.control}
-                  name="sectionname"
+                  name="type"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>
                       </FormLabel>
                       <FormControl>
                         <div className="flex">
-                          <div className="p-2 bg-[#040E46] text-white rounded-xl">Type</div>
-                          <Input placeholder="section name" className="border-l-0 border-t border-r border-b rounded-r-xl rounded-l-none" {...field} />
+                          <div className="p-2 bg-[#040E46] text-white rounded-xl w-auto h-12">Type</div>
+                          <Input placeholder="Type . . ." className="border-l-0 border-t border-r border-b rounded-r-xl rounded-l-none w-auto h-12 text-md" {...field} />
                         </div>
                       </FormControl>
                       <FormDescription>
@@ -126,19 +130,19 @@ const FormPage = () => {
                   )}
                 />
               </div>
-              <Button className="bg-[#040E46]" type="submit">Add Field</Button>
+              <Button className="bg-[#040E46] w-auto h-12 text-md border-2 hover:bg-blue-400 hover:text-black hover:border-black" type="submit">Add Field</Button>
             </CardContent>
           </Card>
-        </form>
-      </Form>
-      <div className="w-full flex justify-center gap-[40vw]">
-        <Button className="bg-[#040E46]">
+      <div className="w-full flex justify-center gap-x-[30vw]">
+        <Button className="bg-transparent text-black border-2 border-[#040E46] hover:bg-yellow-300 hover:text-black w-auto h-12">
              Add Section    
         </Button>
-        <Button className="bg-[#040E46]">
+        <Button className="bg-[#0723BF] hover:bg-blue-400 hover:text-black border-2 hover:border-black w-auto h-12">
              Save Form    
         </Button>
       </div>
+      </form>
+      </Form>
     </div>
   )
 }
