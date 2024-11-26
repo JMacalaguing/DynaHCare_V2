@@ -5,9 +5,12 @@ import ConsultationPage from "./pages/ConsultationPage"
 import Sidebar from "./Components/Sidebar"
 import LoginPage from "./pages/LoginPage"
 
+
 import DashboardExample from "./pages/DashboardPage"
 import Createform from "./pages/CreateformPage"
 import FormPage from "./pages/FormPage"
+import MaternalCare from "./pages/MaternalCare"
+import Tuberculosis from "./pages/Tuberculosis"
 
 
 function App() {
@@ -27,6 +30,9 @@ function App() {
           <Route path="/createForm" element={<Createform />} />
           <Route path="/form" element={<FormPage />} />
           <Route path="/child-care" element={<PatientName />} />
+          <Route path="/maternal-care" element={<MaternalCare />} />
+          <Route path="/Tuberculosis-program" element={<Tuberculosis />} />
+
         </Routes>
     </div>
   )
