@@ -1,6 +1,6 @@
 import { Input } from "@/Components/ui/input"
 
-export default function PatientName() {
+export default function Tuberculosis() {
   return (
     <div className="flex flex-col gap-5 w-full">
       <header className="border-b border-[#E5E7EB] bg-white">
@@ -29,7 +29,7 @@ export default function PatientName() {
 
       <div className="container mx-auto px-4">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold text-[#040E46]">TCL For Child Care Patient</h1>
+          <h1 className="text-2xl font-bold text-[#040E46]">TCL For National Tuberculosis Program</h1>
         </div>
         
         <div className="space-y-4">

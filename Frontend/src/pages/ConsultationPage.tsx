@@ -12,47 +12,42 @@ import {
 const invoices = [
   
   {
-    invoice: "INV001",
+    invoice: "Kent cedrick",
     paymentStatus: "Paid",
-    totalAmount: "$250.00",
+    totalAmount: "November 10, 2024",
     paymentMethod: "Credit Card",
   },
   {
-    invoice: "INV002",
+    invoice: "James",
     paymentStatus: "Pending",
-    totalAmount: "$150.00",
+    totalAmount: "November 10, 2024",
     paymentMethod: "PayPal",
   },
   {
-    invoice: "INV003",
+    invoice: "Sarah",
     paymentStatus: "Unpaid",
-    totalAmount: "$350.00",
+    totalAmount: "November 10, 2024",
     paymentMethod: "Bank Transfer",
   },
   {
-    invoice: "INV004",
+    invoice: "Dave",
     paymentStatus: "Paid",
-    totalAmount: "$450.00",
+    totalAmount: "November 10, 2024",
     paymentMethod: "Credit Card",
   },
   {
-    invoice: "INV005",
+    invoice: "JOydelyn",
     paymentStatus: "Paid",
-    totalAmount: "$550.00",
+    totalAmount: "November 10, 2024",
     paymentMethod: "PayPal",
   },
   {
     invoice: "INV006",
     paymentStatus: "Pending",
-    totalAmount: "$200.00",
+    totalAmount: "November 10, 2024",
     paymentMethod: "Bank Transfer",
   },
-  {
-    invoice: "INV007",
-    paymentStatus: "Unpaid",
-    totalAmount: "$300.00",
-    paymentMethod: "Credit Card",
-  },
+
 ]
 
 export default function ConsultationPage() {
@@ -88,7 +83,7 @@ export default function ConsultationPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px] text-black"> Patienvt Name</TableHead>
+              <TableHead className="w-[100px] text-black"> Patient Name</TableHead>
               <TableHead className="w-[100px] text-black">Date</TableHead>
             </TableRow>
           </TableHeader>

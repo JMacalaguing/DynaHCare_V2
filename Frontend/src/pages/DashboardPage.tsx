@@ -131,7 +131,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-100 flex">
+    <div className="min-h-screen w-full bg-gray-100 flex ">
       <title>Health Admin Dashboard</title>
       <meta name="description" content="Dashboard for Health Administration" />
       <link rel="icon" href="/favicon.ico" />
