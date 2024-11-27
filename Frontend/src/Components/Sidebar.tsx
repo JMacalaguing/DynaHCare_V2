@@ -20,10 +20,9 @@ function Sidebar() {
     const adminName = "Admin"; // or fetch from state if dynamic
     const navigate = useNavigate();
     const handleLogout = async () => {
-          // Redirect to the login page
-          navigate('/');  
+        localStorage.removeItem("token");
+        navigate("/", { replace: true });
       };
-      
     
 
     return (
