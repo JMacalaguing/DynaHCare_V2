@@ -3,7 +3,6 @@ import { FaUserCircle } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { LogOutIcon, Menu, ClipboardList, LayoutDashboardIcon, NotebookPen, Users } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import axios from 'axios';
 
 const SIDEBAR_ITEMS = [
     { name: "Dashboard", icon: LayoutDashboardIcon, color: "#040E46", href: "/dashboardPage" },
