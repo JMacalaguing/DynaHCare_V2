@@ -9,7 +9,7 @@ import DashboardExample from "./pages/DashboardPage"
 import Createform from "./pages/CreateformPage"
 import FormPage from "./pages/FormPage"
 
-import PrivateRoute from "./pages/PrivateRoute"
+import PrivateRoute from "./pages/ProtectedRoute"
 
 
 function App() {
