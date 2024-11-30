@@ -18,16 +18,23 @@ class CustomUserManager(BaseUserManager):
         return self.create_user(full_name, email, phone_number, password, **extra_fields)
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+
     full_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
     phone_number = models.CharField(max_length=15)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
 
     objects = CustomUserManager()
 
     USERNAME_FIELD = 'email'  # Use email as username
-    REQUIRED_FIELDS = ['full_name', 'phone_number']  # Add any other fields that should be required
+    REQUIRED_FIELDS = ['full_name', 'phone_number']
 
     def __str__(self):
         return self.email

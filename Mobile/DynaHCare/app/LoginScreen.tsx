@@ -18,7 +18,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false); // Manage visibility
-  const baseUrl = "exp://192.168.1.2:8081/api/auth/login/";
+  const baseUrl = "http://127.0.0.1:8000/api/auth/login/";
 
   const handleLogin = async () => {
     if (!email || !password) {

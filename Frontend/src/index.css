@@ -64,3 +64,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Global input text color */
+input {
+  @apply text-[#040E46]; /* Apply your custom color */
+}

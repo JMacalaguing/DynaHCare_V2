@@ -10,6 +10,7 @@ import FormPage from "./pages/FormPage";
 import MaternalCare from "./pages/MaternalCare";
 import Tuberculosis from "./pages/Tuberculosis";
 import ProtectedRoute from "./pages/ProtectedRoute";
+import FormInputPage from "./Components/FormInputPage";
 
 
 function App() {
@@ -89,6 +90,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+         <Route path="/form/:formId" element={<FormInputPage />} />
       </Routes>
     </div>
   );

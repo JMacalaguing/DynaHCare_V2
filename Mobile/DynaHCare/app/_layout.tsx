@@ -8,7 +8,8 @@ import { HomeScreen } from "./HomeScreen";
 import { AdminRequestScreen } from "./AdminRequestScreen";
 import { StatusBar, SafeAreaView } from "react-native";
 import { FormDetailsScreen } from "./FormDetailsScreen";
-import { FormInputScreen } from "./FormInputScreen";
+import FormInputScreen from "./FormInputScreen";
+
 
 const Stack = createStackNavigator();
 
