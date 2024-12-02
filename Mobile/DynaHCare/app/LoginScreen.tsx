@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  Alert,
+  Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient"; // For gradient background
 import { Ionicons } from "@expo/vector-icons"; // For icons
@@ -18,32 +18,46 @@ export function LoginScreen({ navigation }: { navigation: any }) {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false); // Manage visibility
+  const [modalVisible, setModalVisible] = useState(false); // Manage popup visibility
+  const [modalMessage, setModalMessage] = useState(""); // Message for the popup
   const baseUrl = "http://127.0.0.1:8000/api/auth/login/";
 
   const handleLogin = async () => {
     if (!email || !password) {
-      Alert.alert("Error", "Please enter both email and password.");
+      setModalMessage("Please enter both email and password.");
+      setModalVisible(true);
       return;
     }
-
+  
     try {
       setLoading(true);
-
-      const response = await axios.post(baseUrl, { email, password });
-      const { token } = response.data;
-
+  
+      // Step 1: Log in and get the user's details
+      const response = await axios.post("http://127.0.0.1:8000/api/auth/login/", { email, password });
+      const { token, user } = response.data; // Destructure the user details
+  
+      // Step 2: Store token and user's full name in AsyncStorage
       await AsyncStorage.setItem("userToken", token);
-
-      Alert.alert("Login Successful", "You are now logged in!");
-      navigation.navigate("Home");
+      await AsyncStorage.setItem("userName", user.full_name); // Store full name
+  
+      // Step 3: Notify user and navigate to Home
+      setModalMessage("Login Successful! Redirecting...");
+      setModalVisible(true);
+  
+      setTimeout(() => {
+        setModalVisible(false);
+        navigation.navigate("Home");
+      }, 1500);
     } catch (error) {
       setLoading(false);
-
+  
       if (axios.isAxiosError(error) && error.response) {
-        Alert.alert("Error", error.response.data?.error || "Invalid credentials.");
+        setModalMessage(error.response.data?.error || "Invalid credentials.");
       } else {
-        Alert.alert("Error", "An unexpected error occurred.");
+        setModalMessage("An unexpected error occurred.");
       }
+  
+      setModalVisible(true);
     } finally {
       setLoading(false);
     }
@@ -56,6 +70,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
       end={{ x: 0, y: 1 }}
       className="flex-1 justify-center items-center"
     >
+      {/* Logo */}
       <View className="items-center mt-[-30%] mb-5">
         <Image
           source={require("../assets/images/logo2.png")}
@@ -67,6 +82,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
         />
       </View>
 
+      {/* Login Form */}
       <View className="w-4/5 mt-[1%]">
         <View className="flex-row items-center bg-white rounded-full px-4 py-2 mb-4 shadow-md">
           <Ionicons name="person-outline" size={20} color="#003366" />
@@ -110,6 +126,28 @@ export function LoginScreen({ navigation }: { navigation: any }) {
           </Text>
         </TouchableOpacity>
       </View>
+
+      {/* Popup Modal */}
+      <Modal
+        transparent={true}
+        animationType="slide"
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/50">
+          <View className="bg-white rounded-lg p-5 shadow-md w-4/5">
+            <Text className="text-lg font-bold text-gray-800 text-center">
+              {modalMessage}
+            </Text>
+            <TouchableOpacity
+              className="mt-5 bg-blue-400 py-2 px-4 rounded-full self-center"
+              onPress={() => setModalVisible(false)}
+            >
+              <Text className="text-white font-bold">OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </LinearGradient>
   );
 }
