@@ -13,6 +13,7 @@ import ProtectedRoute from "./pages/ProtectedRoute";
 import FormInputPage from "./Components/FormInputPage";
 
 
+
 function App() {
   const location = useLocation();
 
@@ -90,6 +91,8 @@ function App() {
             </ProtectedRoute>
           }
         />
+     
+    
          <Route path="/form/:formId" element={<FormInputPage />} />
       </Routes>
     </div>

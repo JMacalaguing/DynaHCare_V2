@@ -2,6 +2,7 @@ import { useState } from "react";
 import { FaUser, FaLock } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import axios, { AxiosError } from "axios";
+import config from "./config";
 
 function LoginPage() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,7 @@ function LoginPage() {
     setError("");
 
     try {
-      const response = await axios.post("http://127.0.0.1:8000/api/auth/admin/login/", {
+      const response = await axios.post(`${config.BASE_URL}/api/auth/admin/login/`, {
         email,
         password,
       });

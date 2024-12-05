@@ -1,3 +1,4 @@
+import config from "@/pages/config";
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -38,7 +39,7 @@ const FormInputPage = () => {
   useEffect(() => {
     async function fetchForm() {
       try {
-        const response = await fetch(`http://localhost:8000/formbuilder/api/forms/${formId}/`);
+        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/`);
         if (!response.ok) {
           throw new Error("Failed to fetch form details.");
         }
@@ -105,32 +106,63 @@ const FormInputPage = () => {
 
   const handleSubmit = async () => {
     try {
-      // Structure the data to include response_data as expected by the backend
-      const dataToSend = {
-        response_data: formValues, // Wrap formValues inside `response_data`
-      };
+      const dataToSend: { response_data: { [key: string]: { [key: string]: string | string[] } } } = { response_data: {} };
   
-      const response = await fetch(`http://localhost:8000/formbuilder/api/forms/${formId}/submit/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(dataToSend), // Send the structured data
-      });
+      if (formData && typeof formData.schema !== 'string' && formData.schema.sections) {
+        formData.schema.sections.forEach((section: Section) => {
+          const sectionId = section.id;
+          const sectionLabel = section.sectionname;
   
-      if (!response.ok) {
-        throw new Error("Failed to submit form.");
+          dataToSend.response_data[sectionLabel] = {};
+  
+          section.fields.forEach((field: Field) => {
+            const fieldId = field.id;
+            const fieldLabel = field.label;
+  
+            const fieldValue = formValues[sectionId]?.[fieldId];
+            console.log(`Field: ${fieldLabel}, Value:`, fieldValue);
+  
+            if (fieldValue !== undefined && fieldValue !== "") {
+              if (Array.isArray(fieldValue)) {
+                dataToSend.response_data[sectionLabel][fieldLabel] = fieldValue;
+              } else {
+                dataToSend.response_data[sectionLabel][fieldLabel] = fieldValue;
+              }
+            } else {
+              console.log(`Field ${fieldLabel} has no value or is empty.`);
+            }
+          });
+        });
+  
+        console.log("Data to send:", dataToSend);
+  
+        if (Object.keys(dataToSend.response_data).length === 0) {
+          console.log("No data in response_data:", dataToSend.response_data);
+          throw new Error("No data found to submit.");
+        }
+  
+        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/submit/`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dataToSend),
+        });
+  
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`Failed to submit form: ${errorText}`);
+        }
+  
+        const responseData = await response.json();
+        console.log("Form submitted successfully:", responseData);
+        setIsModalOpen(true);
+      } else {
+        throw new Error("Invalid form data or schema.");
       }
-  
-      const responseData = await response.json();
-      console.log("Form submitted successfully:", responseData);
-  
-      // Show the success modal
-      setIsModalOpen(true);
     } catch (error) {
       console.error("Error submitting form:", error);
     }
   };
+  
 
   const closeModal = () => {
     setIsModalOpen(false);

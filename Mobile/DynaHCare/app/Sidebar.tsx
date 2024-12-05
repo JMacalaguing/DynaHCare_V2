@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // For AsyncStorage
 import { Ionicons } from "@expo/vector-icons";
 
 type SidebarProps = {
@@ -17,6 +18,24 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeTab,
   setActiveTab,
 }) => {
+  const [userName, setUserName] = useState<string>("");
+
+  // Fetch the username from AsyncStorage when the sidebar is mounted
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const name = await AsyncStorage.getItem("userName");
+        if (name) {
+          setUserName(name); // Update the state with the retrieved username
+        }
+      } catch (error) {
+        console.error("Failed to fetch username from AsyncStorage:", error);
+      }
+    };
+
+    fetchUserName();
+  }, []); // Runs once when the component is mounted
+
   if (!isVisible) return null;
 
   const handleMenuPress = (name: string, action?: () => void) => {
@@ -25,8 +44,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
     } else {
       setActiveTab(name);
       onClose();
-      if (name === "Admin Request") {
-        navigation.navigate("Admin"); // Navigate to Admin Request
+      if (name === "Local Storage") {
+        navigation.navigate("local"); // Navigate to Admin Request
       }
     }
   };
@@ -40,13 +59,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
             source={require("../assets/images/logo2.png")}
             style={{ width: 60, height: 60, resizeMode: "contain" }}
           />
-          <Text className="text-lg font-bold text-blue-800">Jane Marie Doe</Text>
+          <Text className="text-lg font-bold text-blue-800">{userName || "Guest User"}</Text>
           <Text className="text-sm text-gray-500">User</Text>
         </View>
         <View className="">
           {[
             { name: "Home", icon: "home-outline" },
-            { name: "Admin Request", icon: "clipboard-outline" },
+            { name: "Local Storage", icon: "file-tray-stacked-outline" },
             { name: "Log Out", icon: "log-out-outline", action: () => navigation.navigate("Login") },
           ].map((item) => (
             <TouchableOpacity
@@ -78,3 +97,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </View>
   );
 };
+

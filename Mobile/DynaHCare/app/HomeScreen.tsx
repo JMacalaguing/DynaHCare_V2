@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { Sidebar } from "./Sidebar";
+import config from "./config";
 
 type Form = {
   id: string;
@@ -29,7 +30,7 @@ export function HomeScreen({ navigation }: { navigation: any }) {
     const fetchForms = async () => {
       setLoading(true); // Show loading indicator
       try {
-        const response = await fetch("http://localhost:8000/formbuilder/api/forms/");
+        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/`);
         if (!response.ok) {
           throw new Error("Failed to fetch forms");
         }
@@ -81,13 +82,13 @@ export function HomeScreen({ navigation }: { navigation: any }) {
       <View className="flex-row items-center px-4 mt-4">
         <TextInput
           placeholder="Search Form"
-          placeholderTextColor="#003366"
+          placeholderTextColor="#1e40af"
           value={searchQuery}
           onChangeText={setSearchQuery}
           className="flex-1 bg-white rounded-full px-4 py-4 shadow-md border-2 border-blue-200 font-bold"
         />
         <TouchableOpacity className="ml-2">
-          <Ionicons name="search" size={24} color="#003366" />
+          <Ionicons name="search" size={24} color="#1e40af" />
         </TouchableOpacity>
       </View>
 
@@ -103,21 +104,21 @@ export function HomeScreen({ navigation }: { navigation: any }) {
             <View className="flex-row justify-between items-center bg-blue-200 rounded-lg px-4 py-3 my-2 mx-4 shadow-md">
               {/* Form Details (Clickable Area) */}
               <TouchableOpacity
-                className="flex-1"
                 onPress={() => navigation.navigate("FormInput", { formId: item.id })} // Pass only formId
               >
-                <View>
-                  <Text className="text-lg font-bold text-blue-900">{item.title}</Text>
+                <View className="flex-row">
+                <Ionicons name="document-text" size={28} color="#1e40af" /> 
+                  <Text className="text-2xl font-bold text-blue-800 ml-3">{item.title}</Text>
                 </View>
               </TouchableOpacity>
 
               {/* "View" Button */}
-              <TouchableOpacity
+             <TouchableOpacity
                 className="bg-blue-800 rounded-full px-4 py-2 ml-2"
-                onPress={() => navigation.navigate("FormDetails", { formId: item.id })} // Pass only formId
-              >
+                onPress={() => navigation.navigate("FormDetails", { formId: item.id })} // Pass formId
+               >
                 <Text className="text-white font-bold">View</Text>
-              </TouchableOpacity>
+            </TouchableOpacity>
             </View>
           )}
         />

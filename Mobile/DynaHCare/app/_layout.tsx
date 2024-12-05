@@ -5,10 +5,10 @@ import { LoginScreen } from "./LoginScreen"; // Import LoginScreen
 import { SignUpScreen } from "./SignUpScreen"; // Import SignUpScreen
 import "../global.css"; 
 import { HomeScreen } from "./HomeScreen";
-import { AdminRequestScreen } from "./AdminRequestScreen";
 import { StatusBar, SafeAreaView } from "react-native";
 import { FormDetailsScreen } from "./FormDetailsScreen";
 import FormInputScreen from "./FormInputScreen";
+import { LocalStorage } from "./LocalStorage";
 
 
 const Stack = createStackNavigator();
@@ -24,9 +24,9 @@ export default function App() {
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
         <Stack.Screen name="Home" component={HomeScreen} />
-        <Stack.Screen name="Admin" component={AdminRequestScreen} />
         <Stack.Screen name="FormDetails" component={FormDetailsScreen}/>
         <Stack.Screen name="FormInput" component={FormInputScreen}/>
+        <Stack.Screen name="local" component={LocalStorage}/>
       </Stack.Navigator>
     </SafeAreaView>
   );

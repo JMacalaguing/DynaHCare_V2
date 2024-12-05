@@ -2,6 +2,7 @@ import { Button } from "../Components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Plus, Trash2 } from "lucide-react"; // Import Trash icon
 import { useState, useEffect } from "react";
+import config from "./config";
 
 const Createform = () => {
   const route = useNavigate();
@@ -12,7 +13,7 @@ const Createform = () => {
   useEffect(() => {
     async function fetchForms() {
       try {
-        const response = await fetch("http://localhost:8000/formbuilder/api/forms/", {
+        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -38,7 +39,7 @@ const Createform = () => {
   // Function to delete a form
   const deleteForm = async (formId: number) => {
     try {
-      const response = await fetch(`http://localhost:8000/formbuilder/api/forms/${formId}/`, {
+      const response = await fetch(`${config.BASE_URL}/api/forms/${formId}/`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",

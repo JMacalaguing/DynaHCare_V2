@@ -16,6 +16,7 @@ import {
 import { Input } from "../Components/ui/input";
 import { Card, CardContent } from "../Components/ui/card";
 import { useNavigate } from "react-router-dom";
+import config from "./config";
 
 // Modal Component
 function Modal({ isOpen, onClose, title, message }: { isOpen: boolean; onClose: () => void; title: string; message: string }) {
@@ -87,7 +88,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
           throw new Error("No token found. Please log in.");
         }
 
-        const response = await fetch(`http://localhost:8000/formbuilder/api/forms/${formId}/`, {
+        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/`, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -134,7 +135,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
         schema: JSON.stringify({ sections: sanitizedSections }),
       };
 
-      const response = await fetch("http://localhost:8000/formbuilder/api/forms/", {
+      const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

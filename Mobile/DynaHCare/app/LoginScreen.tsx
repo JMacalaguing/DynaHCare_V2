@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient"; // For gradient backgroun
 import { Ionicons } from "@expo/vector-icons"; // For icons
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // For storing the token
+import config from "./config";
 
 export function LoginScreen({ navigation }: { navigation: any }) {
   const [email, setEmail] = useState("");
@@ -20,7 +21,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
   const [passwordVisible, setPasswordVisible] = useState(false); // Manage visibility
   const [modalVisible, setModalVisible] = useState(false); // Manage popup visibility
   const [modalMessage, setModalMessage] = useState(""); // Message for the popup
-  const baseUrl = "http://127.0.0.1:8000/api/auth/login/";
+  const baseUrl = "";
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -33,7 +34,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
       setLoading(true);
   
       // Step 1: Log in and get the user's details
-      const response = await axios.post("http://127.0.0.1:8000/api/auth/login/", { email, password });
+      const response = await axios.post(`${config.BASE_URL}/api/auth/login/`, { email, password });
       const { token, user } = response.data; // Destructure the user details
   
       // Step 2: Store token and user's full name in AsyncStorage
