@@ -82,7 +82,17 @@ class UserLoginView(APIView):
                 return Response({'error': 'Your account is not approved yet.'}, status=403)
 
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'message': 'Login successful', 'token': token.key})
+            
+            # Include user details in the response
+            return Response({
+                'message': 'Login successful',
+                'token': token.key,
+                'user': {
+                    'id': user.id,
+                    'full_name': user.full_name,
+                    'email': user.email,
+                }
+            })
 
         return Response({'error': 'Invalid credentials'}, status=401)
 

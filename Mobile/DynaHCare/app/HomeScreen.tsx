@@ -11,6 +11,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { Sidebar } from "./Sidebar";
+import config from "./config";
 
 type Form = {
   id: string;
@@ -29,7 +30,7 @@ export function HomeScreen({ navigation }: { navigation: any }) {
     const fetchForms = async () => {
       setLoading(true); // Show loading indicator
       try {
-        const response = await fetch("http://localhost:8000/formbuilder/api/forms/");
+        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/`);
         if (!response.ok) {
           throw new Error("Failed to fetch forms");
         }
@@ -112,12 +113,12 @@ export function HomeScreen({ navigation }: { navigation: any }) {
               </TouchableOpacity>
 
               {/* "View" Button */}
-              <TouchableOpacity
+             <TouchableOpacity
                 className="bg-blue-800 rounded-full px-4 py-2 ml-2"
-                onPress={() => navigation.navigate("FormDetails", { formId: item.id })} // Pass only formId
-              >
+                onPress={() => navigation.navigate("FormDetails", { formId: item.id })} // Pass formId
+               >
                 <Text className="text-white font-bold">View</Text>
-              </TouchableOpacity>
+            </TouchableOpacity>
             </View>
           )}
         />

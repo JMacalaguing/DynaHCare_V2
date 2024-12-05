@@ -10,6 +10,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import config from "./config";
 
 export function SignUpScreen({ navigation }: { navigation: any }) {
   const [fullName, setFullName] = useState("");
@@ -20,8 +21,8 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showRejectedModal, setShowRejectedModal] = useState(false);
 
-  const baseUrl = "http://127.0.0.1:8000/api/auth/signup/";
-  const statusUrl = "http://127.0.0.1:8000/api/auth/approve/";
+  const baseUrl = `${config.BASE_URL}/api/auth/signup/`;
+  const statusUrl = `${config.BASE_URL}/api/auth/approve/`;
 
   const handleSignUp = async () => {
     if (!fullName || !phoneNumber || !email || !password) {

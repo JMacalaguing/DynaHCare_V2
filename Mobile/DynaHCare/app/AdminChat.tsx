@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,51 +7,70 @@ import {
   FlatList,
   Image,
 } from "react-native";
+import axios from "axios";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // For accessing AsyncStorage
+
+const API_URL = "http://127.0.0.1:8000/api/chat/";
 
 type Message = {
   id: string;
-  text: string;
-  isUser: boolean; // Whether the message is from the user or admin
-  time: string; // Time of the message
+  sender: string; // 'user' or 'admin'
+  name: string; // User's name
+  message: string;
+  timestamp: string; // Time of the message
 };
 
 export const AdminChat = () => {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: "1",
-      text: "Hello, how can I assist you today?",
-      isUser: false,
-      time: "10:00 AM",
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
+  const [userName, setUserName] = useState(""); // State to store the user's name
 
-  const handleSend = () => {
-    if (newMessage.trim() === "") return;
-
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: newMessage,
-      isUser: true,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+  // Fetch the user's name from AsyncStorage
+  useEffect(() => {
+    const fetchUserName = async () => {
+      try {
+        const storedUserName = await AsyncStorage.getItem("userName");
+        if (storedUserName) {
+          setUserName(storedUserName); // Set the user's name
+        }
+      } catch (error) {
+        console.error("Error fetching user name:", error);
+      }
     };
 
-    setMessages((prevMessages) => [...prevMessages, userMessage]);
+    fetchUserName();
 
-    // Simulating admin's response (for demo purposes)
-    setTimeout(() => {
-      const adminResponse: Message = {
-        id: Date.now().toString(),
-        text: "Thanks for reaching out. I’ll get back to you shortly.",
-        isUser: false,
-        time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      };
+    // Fetch chat messages from the backend
+    const fetchMessages = async () => {
+      try {
+        const response = await axios.get(API_URL);
+        setMessages(response.data);
+      } catch (error) {
+        console.error("Error fetching messages:", error);
+      }
+    };
 
-      setMessages((prevMessages) => [...prevMessages, adminResponse]);
-    }, 2000);
+    fetchMessages();
+  }, []);
 
-    setNewMessage("");
+  // Handle sending a new message
+  const handleSend = async () => {
+    if (newMessage.trim() === "") return;
+
+    const adminMessage = {
+      sender: "admin3",
+      name: userName, // Include user's name
+      message: newMessage,
+    };
+
+    try {
+      const response = await axios.post(API_URL, adminMessage);
+      setMessages((prevMessages) => [...prevMessages, response.data]);
+      setNewMessage("");
+    } catch (error) {
+      console.error("Error sending message:", error);
+    }
   };
 
   return (
@@ -59,7 +78,7 @@ export const AdminChat = () => {
       {/* Header */}
       <View className="flex-row items-center bg-blue-800 py-3 px-4 shadow-md">
         <Image
-          source={require("../assets/images/logo2.png")} // Replace with admin logo
+          source={require("../assets/images/logo2.png")}
           style={{ width: 40, height: 40, borderRadius: 20 }}
         />
         <Text className="ml-4 text-white text-xl font-bold">Admin</Text>
@@ -72,18 +91,21 @@ export const AdminChat = () => {
         renderItem={({ item }) => (
           <View
             className={`flex ${
-              item.isUser ? "items-end" : "items-start"
+              item.sender === "user" ? "items-end" : "items-start"
             } px-4 my-2`}
           >
             <View
               className={`max-w-3/4 px-4 py-3 rounded-lg ${
-                item.isUser
+                item.sender === "user"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-300 text-gray-900"
               }`}
             >
-              <Text className="text-sm">{item.text}</Text>
-              <Text className="text-xs text-gray-600 mt-1">{item.time}</Text>
+              <Text className="text-sm">{item.message}</Text>
+              <Text className="text-xs text-gray-600 mt-1">{item.timestamp}</Text>
+              {item.sender === "user" && (
+                <Text className="text-xs text-gray-600 mt-1">- {item.name}</Text> 
+              )}
             </View>
           </View>
         )}

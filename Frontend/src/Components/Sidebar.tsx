@@ -16,7 +16,7 @@ function Sidebar() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const location = useLocation();
-    const adminName = "Admin"; // or fetch from state if dynamic
+    const adminName = "Admin";
     const navigate = useNavigate();
     const handleLogout = async () => {
         localStorage.removeItem("token");
