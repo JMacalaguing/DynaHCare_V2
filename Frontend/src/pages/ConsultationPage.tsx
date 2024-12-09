@@ -19,33 +19,30 @@ const exportToCSV = (data: { name: string; date: string }[]) => {
 };
 
 export default function ConsultationPage() {
-  // State to store logbook data
   const [logbookEntries, setLogbookEntries] = useState<{ name: string; date: string }[]>([]);
 
-  // Fetch logbook data from the server on component mount
   useEffect(() => {
     const fetchLogbookData = async () => {
       try {
-        const response = await fetch(`${config.BASE_URL}/api/logbook/`); // Replace with your API endpoint
+        const response = await fetch(`${config.BASE_URL}/api/logbook/`);
         const data = await response.json();
-        setLogbookEntries(data); // Assuming the API response is an array of logbook entries
+        setLogbookEntries(data);
       } catch (error) {
         console.error('Error fetching logbook data:', error);
       }
     };
 
     fetchLogbookData();
-  }, []); // Empty dependency array to fetch data once on mount
+  }, []);
 
-  // Function to clear data from both state and database
   const clearData = async () => {
     try {
       const response = await fetch(`${config.BASE_URL}/api/logbook/`, {
-        method: 'DELETE', // Use DELETE method to remove data
+        method: 'DELETE',
       });
 
       if (response.ok) {
-        setLogbookEntries([]); // Clear the state
+        setLogbookEntries([]);
         alert('Data cleared successfully');
       } else {
         alert('Error clearing data');
@@ -57,55 +54,55 @@ export default function ConsultationPage() {
   };
 
   return (
-    <div className="flex-col gap-5 w-full bg-gray-50 min-h-screen">
-      <header className="border-b border-[#E5E7EB] bg-white shadow-md">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <div className="flex items-center space-x-2">
-            <span className="text-2xl font-semibold text-[#040E46]">Consultation LogBook</span>
-          </div>
-          {/* Add Clear Data and Export Buttons */}
-          <div className="flex items-center gap-4">
+    <div className="w-full bg-gradient-to-tr from-gray-100 via-blue-50 to-white flex flex-col">
+      <header className=" shadow-lg">
+        <div className="container mx-auto flex justify-between items-center px-6 py-4">
+          <h1 className="text-3xl font-bold text-gray-800">Consultation LogBook</h1>
+          <div className="flex space-x-4">
             <button
               onClick={clearData}
-              className="bg-red-500 text-white px-4 py-2 rounded-md"
+              className="px-4 py-2 bg-red-500 text-white rounded-lg shadow-md hover:bg-red-600 transition-transform transform hover:scale-105"
             >
               Clear Data
             </button>
             <button
               onClick={() => exportToCSV(logbookEntries)}
-              className="bg-green-500 text-white px-4 py-2 rounded-md"
+              className="px-4 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600 transition-transform transform hover:scale-105"
             >
               Export
             </button>
           </div>
         </div>
       </header>
-    
-      <div className="w-full text-black">
-        {/* Table to display logbook data */}
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px] text-black">Patient Name</TableHead>
-              <TableHead className="w-[100px] text-black">Date</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {logbookEntries.length > 0 ? (
-              logbookEntries.map((entry, index) => (
-                <TableRow key={index}>
-                  <TableCell className="font-medium">{entry.name}</TableCell>
-                  <TableCell className="font-medium">{new Date(entry.date).toDateString()}</TableCell>
-                </TableRow>
-              ))
-            ) : (
+
+      <main className="container mx-auto p-8">
+        <div className="bg-white shadow-lg rounded-lg overflow-hidden">
+          <Table className="shadow-md">
+            <TableHeader className="bg-gradient-to-t from-sky-300 to-emerald-300">
               <TableRow>
-                <TableCell colSpan={2} className="text-center">No logbook entries available</TableCell>
+                <TableHead className="text-gray-700 font-bold h-16 text-xl">Patient Name</TableHead>
+                <TableHead className="text-gray-700 font-bold h-16 text-xl">Date</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {logbookEntries.length > 0 ? (
+                logbookEntries.map((entry, index) => (
+                  <TableRow key={index} className="hover:bg-gray-50 transition-all">
+                    <TableCell className="text-gray-900 h-14">{entry.name}</TableCell>
+                    <TableCell className="text-gray-900 h-14">{new Date(entry.date).toDateString()}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={2} className="text-center text-gray-500">
+                    No logbook entries available
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </main>
     </div>
   );
 }

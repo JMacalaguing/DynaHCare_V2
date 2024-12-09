@@ -11,7 +11,7 @@ class FormSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Form
-        fields = ['id', 'title', 'schema']
+        fields = ['id', 'title', 'schema','description']
 
 class FormResponseSerializer(serializers.ModelSerializer):
     """

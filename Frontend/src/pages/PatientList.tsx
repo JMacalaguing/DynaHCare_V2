@@ -43,7 +43,7 @@ export default function PatientList() {
       <main className="container mx-auto px-4 py-8">
         <div className="overflow-x-auto shadow-lg rounded-lg bg-white">
           <table className="min-w-full table-auto border-collapse border border-gray-300">
-            <thead className="bg-gray-100">
+            <thead className="bg-gradient-to-t from-sky-400 to-emerald-300">
               <tr>
                 <th className="text-left px-6 py-3 text-gray-700 font-medium border-b">
                   Patient Name

@@ -51,20 +51,16 @@ export function FormDetailsScreen({ route, navigation }: { route: any; navigatio
       </View>
 
       {/* Form Details */}
-      <View className="m-4 p-4 bg-white rounded-lg shadow-md">
+      <View className="m-5 p-4 bg-white rounded-lg shadow-md">
         <Text className="text-lg font-bold text-blue-900 mb-2">Form Title</Text>
-        <View className="border-2 border-blue-200 rounded-md p-2 mb-4">
-          <Text>{form.title}</Text>
+        <View className="shadow-md rounded-md p-8 ">
+          <Text className="font-bold">{form.title}</Text>
         </View>
 
-        <Text className="text-lg font-bold text-blue-900 mb-2">Responses</Text>
-        <View className="border-2 border-blue-200 rounded-md p-2 mb-4">
-          <Text>{form.responses || "No responses available"}</Text>
+        <Text className="text-lg font-bold text-blue-900 mb-2">Description</Text>
+        <View className="shadow-md rounded-md p-12 mb-4">
+          <Text>{form.description || "No description available"}</Text>
         </View>
-
-        <TouchableOpacity className="bg-blue-800 rounded-lg px-4 py-3">
-          <Text className="text-white text-center font-bold">Load</Text>
-        </TouchableOpacity>
       </View>
     </View>
   );

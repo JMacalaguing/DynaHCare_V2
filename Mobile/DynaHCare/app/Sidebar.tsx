@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, Pressable } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // For AsyncStorage
 import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "./AuthContext";
 
 type SidebarProps = {
   isVisible: boolean;
@@ -27,9 +28,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
         const name = await AsyncStorage.getItem("userName");
         if (name) {
           setUserName(name); // Update the state with the retrieved username
+        } else {
+          setUserName("Guest User"); // Default fallback if no name is found
         }
       } catch (error) {
         console.error("Failed to fetch username from AsyncStorage:", error);
+        setUserName("Guest User"); // Default fallback in case of error
       }
     };
 
@@ -45,10 +49,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
       setActiveTab(name);
       onClose();
       if (name === "Local Storage") {
-        navigation.navigate("local"); // Navigate to Admin Request
+        navigation.navigate("local"); // Navigate to Local Storage screen
       }
     }
   };
+
+  const { logout } = useAuth();
 
   return (
     <View className="absolute top-0 left-0 h-full w-full z-10 flex-row">
@@ -59,22 +65,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
             source={require("../assets/images/logo2.png")}
             style={{ width: 60, height: 60, resizeMode: "contain" }}
           />
-          <Text className="text-lg font-bold text-blue-800">{userName || "Guest User"}</Text>
+          <Text className="text-lg font-bold text-blue-800">{userName}</Text>
           <Text className="text-sm text-gray-500">User</Text>
         </View>
         <View className="">
-          {[
-            { name: "Forms", icon: "home-outline" },
-            { name: "Consultation LogBook", icon: "newspaper-outline", action: () => navigation.navigate("Consult") },
-            { name: "Local Storage", icon: "file-tray-stacked-outline" },
-            { name: "Log Out", icon: "log-out-outline", action: () => navigation.navigate("Login") },
+          {[{
+              name: "Forms",
+              icon: "home-outline"
+            },
+            {
+              name: "Consultation LogBook",
+              icon: "newspaper-outline",
+              action: () => navigation.navigate("Consult") // Correct route for navigation
+            },
+            {
+              name: "Local Storage",
+              icon: "file-tray-stacked-outline"
+            },
+            {
+              name: "Log Out",
+              icon: "log-out-outline",
+              action: () => logout() // Wrapping logout in a function for clarity
+            }
           ].map((item) => (
             <TouchableOpacity
               key={item.name}
-              className={`flex-row items-center p-4 ${
-                activeTab === item.name ? "bg-blue-200" : "bg-white"
-              }`}
+              className={`flex-row items-center p-4 ${activeTab === item.name ? "bg-blue-200" : "bg-white"}`}
               onPress={() => handleMenuPress(item.name, item.action)}
+              accessibilityLabel={`Go to ${item.name}`} // Adding accessibility label
             >
               <Ionicons
                 name={item.icon as keyof typeof Ionicons.glyphMap}
@@ -82,9 +100,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 color={activeTab === item.name ? "#003366" : "#555"}
               />
               <Text
-                className={`ml-4 text-lg ${
-                  activeTab === item.name ? "text-blue-800 font-bold" : "text-gray-700"
-                }`}
+                className={`ml-4 text-lg ${activeTab === item.name ? "text-blue-800 font-bold" : "text-gray-700"}`}
               >
                 {item.name}
               </Text>
@@ -98,5 +114,3 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </View>
   );
 };
-
-

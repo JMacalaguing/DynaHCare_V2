@@ -80,7 +80,7 @@ const Createform = () => {
               return (
                 <li
                   key={form.id}
-                  className="p-6 bg-white border border-gray-200 rounded-lg hover:shadow-xl hover:bg-gray-50 cursor-pointer transition-all ease-in-out"
+                  className="p-6 bg-gradient-to-t from-sky-400 to-emerald-300 border border-gray-200 rounded-lg hover:shadow-xl hover:bg-gray-50 cursor-pointer transition-all ease-in-out"
                   onClick={() => route(`/form/${form.id}`)} // On click, navigate to form input page
                 >
                   <div className="flex justify-between items-center">

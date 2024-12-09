@@ -5,6 +5,7 @@ from dynamic_forms.models import FormField, ResponseField
 class Form(models.Model):
     title = models.CharField(max_length=255)
     schema = FormField()  # Store the JSON structure of the form (e.g., form sections and fields)
+    description = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return self.title

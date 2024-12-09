@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -11,8 +11,9 @@ import {
 import { LinearGradient } from "expo-linear-gradient"; // For gradient background
 import { Ionicons } from "@expo/vector-icons"; // For icons
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // For storing the token
+import { useAuth } from "./AuthContext"; // Import useAuth
 import config from "./config";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export function LoginScreen({ navigation }: { navigation: any }) {
   const [email, setEmail] = useState("");
@@ -22,6 +23,20 @@ export function LoginScreen({ navigation }: { navigation: any }) {
   const [modalVisible, setModalVisible] = useState(false); // Manage popup visibility
   const [modalMessage, setModalMessage] = useState(""); // Message for the popup
 
+  // Destructure the login function from useAuth
+  const { login } = useAuth();
+
+  useEffect(() => {
+    const checkAuthentication = async () => {
+      const token = await AsyncStorage.getItem("userToken");
+      if (token) {
+        // If token exists, navigate to Home
+        navigation.navigate("Home");
+      }
+    };
+
+    checkAuthentication();
+  }, []);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -29,35 +44,35 @@ export function LoginScreen({ navigation }: { navigation: any }) {
       setModalVisible(true);
       return;
     }
-  
+
     try {
       setLoading(true);
-  
+
       // Step 1: Log in and get the user's details
       const response = await axios.post(`${config.BASE_URL}/api/auth/login/`, { email, password });
       const { token, user } = response.data; // Destructure the user details
-  
-      // Step 2: Store token and user's full name in AsyncStorage
-      await AsyncStorage.setItem("userToken", token);
-      await AsyncStorage.setItem("userName", user.full_name); // Store full name
-  
+
+      // Step 2: Use the login function from AuthContext
+      // This will handle both the state update and storing the token/userName
+      login(token, user.full_name);
+
       // Step 3: Notify user and navigate to Home
       setModalMessage("Login Successful! Redirecting...");
       setModalVisible(true);
-  
+
       setTimeout(() => {
         setModalVisible(false);
         navigation.navigate("Home");
       }, 1500);
     } catch (error) {
       setLoading(false);
-  
+
       if (axios.isAxiosError(error) && error.response) {
         setModalMessage(error.response.data?.error || "Invalid credentials.");
       } else {
         setModalMessage("An unexpected error occurred.");
       }
-  
+
       setModalVisible(true);
     } finally {
       setLoading(false);

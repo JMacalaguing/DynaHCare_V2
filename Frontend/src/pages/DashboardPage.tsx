@@ -151,7 +151,7 @@ export default function Dashboard() {
         </div>
 
         {/* Program Header */}
-        <div className="mb-8 bg-white rounded-lg shadow p-6">
+        <div className="mb-8 bg-gradient-to-t from-sky-300 to-emerald-300 rounded-lg shadow p-6">
           <div className="flex items-center justify-around"> 
             <button 
               onClick={handlePrevProgram}
@@ -160,7 +160,7 @@ export default function Dashboard() {
             >
               <ChevronLeft color='black' />
             </button>
-            <div className="text-center">
+            <div className="text-center ">
               <h2 className="text-xl font-bold text-black">{currentProgram.name}</h2>
               <p className="text-sm text-gray-600">Area: {currentProgram.area}</p>
             </div>

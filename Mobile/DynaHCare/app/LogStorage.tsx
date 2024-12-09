@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Text, View, FlatList, TouchableOpacity, Modal, Button } from 'react-native';
 import { Header } from './Header';
-import { loadAllData, deleteData } from './database'; // Import deleteData function
+import { loadAllData, deleteData } from './ConssultationDB'; // Import deleteData function
 import { Ionicons } from '@expo/vector-icons'; // Import Ionicons for delete icon
 import config from './config';
 
-export function LocalStorage({ navigation }: { navigation: any }) {
+export function LogStorage({ navigation }: { navigation: any }) {
   const [formData, setFormData] = useState<any[]>([]); // State to hold all form data
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
@@ -26,45 +26,56 @@ export function LocalStorage({ navigation }: { navigation: any }) {
 
   const handleSubmitServer = async () => {
     try {
-      for (const formToSubmit of formData) {
-        // Extract the form data
-        const dataToSend = {
-          form: formToSubmit.responseData.form, // Send the form ID
-          formTitle: formToSubmit.responseData.formTitle, // Send the form title
-          response_data: formToSubmit.responseData.response_data, // Send the response data
-          sender:formToSubmit.responseData.sender,
-        };
-
-        // Log the correct data being sent to the server
-        console.log("Sending data to server:", JSON.stringify(dataToSend, null, 2));
-
-        // Make the POST request to the server
-        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formToSubmit.responseData.form}/submit/`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(dataToSend),
+      // Ensure you have selected form data to send
+      if (formData.length === 0) {
+        console.log("No data to send to the server.");
+        return;
+      }
+  
+      // Construct the payload from selected form data
+      // For example, assuming `formData` contains an array of form entries
+      const dataToSend = formData.map((form: any) => {
+        return { name: form.responseData.name, date: new Date(form.responseData.date).toISOString().split('T')[0] };
+      });
+  
+      // Log the data to ensure it's formatted correctly
+      console.log("Sending data to server:", JSON.stringify(dataToSend, null, 2));
+  
+      // Send the data to the server
+      const apiUrl = `${config.BASE_URL}/api/logbook/`;
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(dataToSend),
+      });
+  
+      if (response.ok) {
+        const jsonResponse = await response.json();
+        console.log("Server response:", jsonResponse);
+  
+        // If the submission is successful, delete local data
+        formData.forEach((form) => {
+          deleteData(form.id);
         });
-
-        if (response.ok) {
-          const jsonResponse = await response.json();
-          console.log("Server response:", jsonResponse);
-                    // Delete data from local storage after successful submission
-                    deleteData(formToSubmit.id);
-                    setFormData((prevData) => prevData.filter((item) => item.id !== formToSubmit.id)); // Remove the item from the state
-          
-                    setIsSubmitModalOpen(true);
-          // Handle success (e.g., show success modal, etc.)
-        } else {
-          console.error("Failed to send data:", response.status);
-          // Handle error (e.g., show error modal, etc.)
-        }
+  
+        // Clear local state after successful submission
+        setFormData([]); 
+  
+        // Show success modal
+        setIsSubmitModalOpen(true);
+  
+      } else {
+        console.error("Failed to send data:", response.status);
+        // Handle error (e.g., show error modal, etc.)
       }
     } catch (error) {
       console.error("Error sending data to server:", error);
+      // Handle error (e.g., show error modal, etc.)
     }
   };
+  
 
   const handleSubmit = () => {
     setIsConfirmationModalOpen(true);
@@ -97,7 +108,7 @@ export function LocalStorage({ navigation }: { navigation: any }) {
       end={{ x: 0, y: 1 }}
       className="flex-1"
     >
-      <Header title="Local Storage" navigation={navigation} />
+      <Header title="Log Storage" navigation={navigation} />
 
       <FlatList
         data={formData}

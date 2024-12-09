@@ -120,7 +120,7 @@ export default function Home() {
   const currentDate = new Date().toLocaleDateString();
 
   return (
-    <div className="min-h-screen bg-white w-full">
+    <div className="min-h-screen bg-gradient-to-t from-sky-300 to-blue-50 w-full">
       <title>Patient Healthcare Portal</title>
       <meta name="description" content="Patient Healthcare Portal" />
 
@@ -161,7 +161,7 @@ export default function Home() {
               <button
                 key={form.id}
                 onClick={() => fetchPatients(form)}
-                className="flex h-32 items-center justify-center rounded-lg bg-[#00205B] p-6 text-center text-lg font-semibold text-white transition-all transform hover:scale-105 hover:shadow-lg shadow-lg"
+                className="flex h-32 items-center justify-center rounded-lg bg-gradient-to-t from-sky-400 to-emerald-300 p-6 text-center text-lg font-semibold text-white transition-all transform hover:scale-105 hover:shadow-lg shadow-lg"
               >
                 {form.title}
               </button>

@@ -40,6 +40,7 @@ const FormSchema = z.object({
   formname: z.string().min(2, {
     message: "Form name must be at least 2 characters.",
   }),
+  description: z.string().min(5, { message: "Description must be at least 5 characters." }),  // Add description
   sections: z.array(
     z.object({
       sectionname: z.string().min(2, {
@@ -65,6 +66,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
     resolver: zodResolver(FormSchema),
     defaultValues: {
       formname: "",
+      description: "",  // Default value for description
       sections: [{ sectionname: "", fields: [] }],
     },
   });
@@ -132,6 +134,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
 
       const payload = {
         title: data.formname,
+        description: data.description,  // Send the description with the form
         schema: JSON.stringify({ sections: sanitizedSections }),
       };
 
@@ -157,6 +160,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
 
       form.reset({
         formname: "",
+        description: "",  // Reset description
         sections: [{ sectionname: "", fields: [] }],
       });
     } catch (error: unknown) {
@@ -171,11 +175,11 @@ export default function FormBuilder({ formId }: { formId?: number }) {
   };
 
   return (
-    <div className="w-full h-full flex flex-col gap-8 justify-center items-center text-black">
+    <div className="w-full h-full flex flex-col gap-8 justify-center items-center text-black ">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="w-4/5 space-y-6 flex flex-col border-2 border-gray-400 rounded-lg p-7 overflow-auto max-h-[80vh]"
+          className="w-[90%] max-w-[1200px] space-y-6 flex flex-col border-solid border-2 border-sky-500 rounded-lg p-10 overflow-auto max-h-[90vh] shadow-2xl"
         >
           <FormField
             control={form.control}
@@ -183,10 +187,29 @@ export default function FormBuilder({ formId }: { formId?: number }) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xl">Form Name</FormLabel>
+                <FormDescription className="text-md">This is your Form Name.</FormDescription>
                 <FormControl>
                   <Input placeholder="Title . . ." className="w-full h-12 text-md" {...field} />
                 </FormControl>
-                <FormDescription className="text-md">This is your Form Name.</FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-xl">Form Description</FormLabel>
+                <FormDescription className="text-md">Describe the purpose of this form.</FormDescription>
+                <FormControl>
+                  <Input
+                    placeholder="Write a description for your form..."
+                    className="w-full h-12 text-md"
+                    {...field}
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -251,6 +274,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
     </div>
   );
 }
+
 
 interface FieldArrayProps {
   sectionIndex: number;
