@@ -69,3 +69,4 @@ export function FormDetailsScreen({ route, navigation }: { route: any; navigatio
     </View>
   );
 }
+export default FormDetailsScreen;

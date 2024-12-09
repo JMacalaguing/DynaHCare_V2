@@ -130,6 +130,8 @@ export default function Dashboard() {
     return itemData.flat().reduce((sum: any, value: any) => sum + value, 0) / itemData.flat().length
   }
 
+  const currentDate = new Date().toLocaleDateString();
+
   return (
     <div className="min-h-screen w-full bg-gray-100 flex ">
       <title>Health Admin Dashboard</title>
@@ -144,7 +146,7 @@ export default function Dashboard() {
           </div>
           <div className="flex items-center gap-2">
             <CalendarDays color="black" fill="white" />
-            <span className="font-medium text-black">July 22, 2024</span>
+            <span className="font-medium text-black">{currentDate}</span>
           </div>
         </div>
 

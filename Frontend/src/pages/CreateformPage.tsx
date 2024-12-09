@@ -1,4 +1,4 @@
-import { Button } from "../Components/ui/button"; 
+import { Button } from "../Components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Plus, Trash2 } from "lucide-react"; // Import Trash icon
 import { useState, useEffect } from "react";
@@ -39,7 +39,7 @@ const Createform = () => {
   // Function to delete a form
   const deleteForm = async (formId: number) => {
     try {
-      const response = await fetch(`${config.BASE_URL}/api/forms/${formId}/`, {
+      const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/`, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -58,11 +58,11 @@ const Createform = () => {
   };
 
   return (
-    <div className="flex-col gap-5 w-full">
-      <header className="border-b border-[#E5E7EB] bg-white">
+    <div className="flex-col gap-5 w-full bg-gray-50 min-h-screen">
+      <header className="border-b border-[#E5E7EB] bg-white shadow-md">
         <div className="container mx-auto flex items-center justify-between px-4 py-4">
           <div className="flex items-center space-x-2">
-            <span className="text-xl font-semibold text-[#040E46]">Forms</span>
+            <span className="text-2xl font-semibold text-[#040E46]">Forms</span>
           </div>
         </div>
       </header>
@@ -70,9 +70,9 @@ const Createform = () => {
       {/* Forms List */}
       <div className="container mx-auto px-4 py-6">
         {isLoading ? (
-          <div>Loading...</div> // Show loading message while fetching data
+          <div className="text-center text-lg text-gray-500">Loading...</div> // Show loading message while fetching data
         ) : forms.length === 0 ? (
-          <div>No forms found. Please create a new form.</div> // Show if no forms are found
+          <div className="text-center text-lg text-gray-500">No forms found. Please create a new form.</div> // Show if no forms are found
         ) : (
           <ul className="space-y-4 max-h-[400px] overflow-y-auto">
             {forms.map((form: any) => {
@@ -80,20 +80,21 @@ const Createform = () => {
               return (
                 <li
                   key={form.id}
-                  className="p-4 border border-gray-200 rounded-lg hover:bg-gray-100 cursor-pointer"
+                  className="p-6 bg-white border border-gray-200 rounded-lg hover:shadow-xl hover:bg-gray-50 cursor-pointer transition-all ease-in-out"
                   onClick={() => route(`/form/${form.id}`)} // On click, navigate to form input page
                 >
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <span className="font-bold text-lg text-[#040E46]">{form.title}</span>
                     <Button
-                    type="button"
-                    variant="ghost"
-                    className="p-2"
-                    onClick={(e) => {
-                      e.stopPropagation(); // Prevent triggering form click
-                      deleteForm(form.id); // Call delete function
-                    }}>
-                      <Trash2 className="h-5 w-5 text-red-500" />
+                      type="button"
+                      variant="ghost"
+                      className="p-2 text-red-500 hover:text-red-600 transition-colors"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Prevent triggering form click
+                        deleteForm(form.id); // Call delete function
+                      }}
+                    >
+                      <Trash2 className="h-5 w-5" />
                     </Button>
                   </div>
                   <div className="text-sm text-gray-500">
@@ -108,8 +109,13 @@ const Createform = () => {
 
       {/* Create Form Button */}
       <div className="flex justify-center items-center">
-        <Button className="bg-[#040E46] hover:bg-[#FF3434]" onClick={() => { route("/form"); }}>
-          <Plus /> Create Form
+        <Button
+          className="bg-[#040E46] text-white hover:bg-[#FF3434] shadow-lg hover:shadow-xl transition-all ease-in-out"
+          onClick={() => {
+            route("/form");
+          }}
+        >
+          <Plus className="mr-2" /> Create Form
         </Button>
       </div>
     </div>

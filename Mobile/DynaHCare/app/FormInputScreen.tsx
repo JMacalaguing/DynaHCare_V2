@@ -4,7 +4,8 @@ import Checkbox from "expo-checkbox";
 import { useRoute } from "@react-navigation/native";
 import config from "./config";
 import { Ionicons } from "@expo/vector-icons";
-import { createTable, saveData } from './database'; // Import SQLite functions
+import { createTable, saveData } from './database'; 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface Field {
   id: string;
@@ -41,7 +42,7 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
   const [isSaveLocalModalOpen, setIsSaveLocalModalOpen] = useState(false);
   const [isSubmitlocalSuccessModalOpen, setIsSubmitlocalSuccessModalOpen] = useState(false);
 
-  
+
   useEffect(() => {
     async function fetchForm() {
       try {
@@ -52,12 +53,20 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
         const data = await response.json();
 
         let parsedSchema;
-        if (typeof data.schema === "string") {
+        if (data.schema && typeof data.schema === "string") {
           const correctedSchema = data.schema.replace(/'/g, '"');
-          parsedSchema = JSON.parse(correctedSchema);
-        } else {
+          try {
+            parsedSchema = JSON.parse(correctedSchema);
+          } catch (error) {
+            console.error("Error parsing schema:", error);
+            parsedSchema = null;
+          }
+        } else if (data.schema && typeof data.schema === "object") {
           parsedSchema = data.schema;
-        }
+        } else {
+          console.warn("Invalid schema format or schema is undefined.");
+          parsedSchema = null;
+        }        
 
         setFormData({ ...data, schema: parsedSchema });
       } catch (error) {
@@ -142,10 +151,20 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
     }
   
     try {
+      // Retrieve the sender's name from AsyncStorage
+      const senderName = await AsyncStorage.getItem("userName");
+      
+      if (!senderName) {
+        console.warn("User's name not found in AsyncStorage");
+        return;
+      }
+  
+      // Prepare the data to save, including the sender's name
       const dataToSave = {
         form: formId, // Form ID
         formTitle: formData.title, // Form title
         response_data: formValues, // Form values
+        sender: senderName,  // Add sender's name
       };
   
       console.log("Saving data locally:", JSON.stringify(dataToSave, null, 2));
@@ -166,7 +185,12 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
     if (confirmed) {
       // Proceed to send data to the server
       try {
-        const dataToSend = { response_data: formValues };
+        // Get the user name from AsyncStorage
+        const userName = await AsyncStorage.getItem('userName');
+        const dataToSend = { 
+          response_data: formValues,
+          sender: userName,  // Add the sender's name here
+        };
         console.log("Data to send:", JSON.stringify(dataToSend, null, 2));
   
         // Send to the server
@@ -324,7 +348,6 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
         </View>
       </View>
     </Modal>
-
                 {/* Submit Success Modal local storage */}
           <Modal visible={isSubmitlocalSuccessModalOpen} animationType="slide">
           <View className="flex-1 justify-center items-center bg-gray-500/50 mt-[-90]">

@@ -8,5 +8,7 @@ urlpatterns = [
     path('admin/login/', views.AdminLoginView.as_view(), name='admin_login'),
     path('admin/approve/', views.UserApprovalView.as_view(), name='user_approve'),
     path('approve/', views.CheckApprovalStatusView.as_view(), name='check_approval'),
+    path('update-status/', views.UpdateUserStatusView.as_view(), name='update-status'),
+    path('user-list/', views.UserListView.as_view(), name='user_list'),
   
 ]

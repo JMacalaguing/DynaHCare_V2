@@ -1,8 +1,8 @@
+import { useState, useEffect } from "react";
 import config from "@/pages/config";
-import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-// Define types for form data
+// Define types for the form values
 interface Field {
   id: string;
   label: string;
@@ -23,62 +23,46 @@ interface FormData {
 }
 
 interface FormValues {
-  [sectionId: string]: {
-    [fieldId: string]: string | string[];
+  [sectionName: string]: {
+    [fieldLabel: string]: string | string[];
   };
 }
 
 const FormInputPage = () => {
-  const { formId } = useParams(); // Get formId from URL
-  const [formData, setFormData] = useState<FormData | null>(null); // State to hold form data
-  const [formValues, setFormValues] = useState<FormValues>({}); // State to hold user input data
-  const [isModalOpen, setIsModalOpen] = useState(false); // State to control modal visibility
+  const { formId } = useParams();
+  const [formData, setFormData] = useState<FormData | null>(null); // Form schema data
+  const [formValues, setFormValues] = useState<FormValues>({}); // User input data
+  const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false); // State for confirmation modal
+  const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false); // State for success modal
   const navigate = useNavigate();
 
-  // Fetch form data based on `formId`
+  // Fetch the form data
   useEffect(() => {
-    async function fetchForm() {
+    const fetchForm = async () => {
       try {
         const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/`);
         if (!response.ok) {
           throw new Error("Failed to fetch form details.");
         }
         const data = await response.json();
-
-        let parsedSchema;
-        if (typeof data.schema === "string") {
-          // If schema is a string, parse it
-          try {
-            const correctedSchema = data.schema.replace(/'/g, '"'); // Replace single quotes with double quotes
-            parsedSchema = JSON.parse(correctedSchema);
-          } catch (error) {
-            console.error("Failed to parse schema:", data.schema, error);
-            throw new Error("Invalid schema format.");
-          }
-        } else {
-          // If schema is already an object, use it directly
-          parsedSchema = data.schema;
-        }
-
+        let parsedSchema = typeof data.schema === "string" ? JSON.parse(data.schema.replace(/'/g, '"')) : data.schema;
         setFormData({ ...data, schema: parsedSchema });
       } catch (error) {
         console.error("Error fetching form data:", error);
       }
-    }
+    };
 
     fetchForm();
   }, [formId]);
 
-  // Initialize `formValues` when `formData` is loaded
   useEffect(() => {
-    if (formData && typeof formData.schema === "object" && "sections" in formData.schema) {
+    if (formData?.schema && typeof formData.schema !== "string" && formData.schema.sections) {
       const initialValues: FormValues = {};
 
-      formData.schema.sections.forEach((section) => {
-        initialValues[section.id] = {};
-        section.fields.forEach((field) => {
-          // Initialize the field value based on type
-          initialValues[section.id][field.id] = field.type === "checkbox-group" ? [] : "";
+      formData.schema.sections.forEach((section: Section) => {
+        initialValues[section.sectionname] = {}; // Initialize an object for each section
+        section.fields.forEach((field: Field) => {
+          initialValues[section.sectionname][field.label.trim()] = field.type === "checkbox-group" ? [] : ""; // Trim the label
         });
       });
 
@@ -86,89 +70,113 @@ const FormInputPage = () => {
     }
   }, [formData]);
 
-  // Handle input change
-  const handleInputChange = (sectionId: string, fieldId: string, value: string | string[]) => {
+  const handleInputChange = (sectionName: string, fieldLabel: string, value: string | string[]) => {
+    const trimmedLabel = fieldLabel.trim(); // Trim spaces from the field label
+
     setFormValues((prevValues) => ({
       ...prevValues,
-      [sectionId]: {
-        ...prevValues[sectionId],
-        [fieldId]: value,
+      [sectionName]: {
+        ...prevValues[sectionName],
+        [trimmedLabel]: value, // Use the trimmed label as the key
       },
     }));
   };
 
-  // Helper function to parse options
-  const parseOptions = (options: string | string[] | undefined): string[] => {
-    if (!options) return [];
-    if (Array.isArray(options)) return options;
-    return options.split(",").map((opt) => opt.trim());
+  // Handle checkbox changes
+  const handleCheckboxChange = (sectionName: string, fieldLabel: string, option: string, isChecked: boolean) => {
+    setFormValues((prevValues) => {
+      const currentFieldValue = prevValues[sectionName]?.[fieldLabel] || [];
+      const updatedValue = Array.isArray(currentFieldValue)
+        ? isChecked
+          ? [...currentFieldValue, option]
+          : currentFieldValue.filter((val: string) => val !== option)
+        : isChecked
+        ? [option]
+        : [];
+
+      return {
+        ...prevValues,
+        [sectionName]: {
+          ...prevValues[sectionName],
+          [fieldLabel]: updatedValue,
+        },
+      };
+    });
   };
 
-  const handleSubmit = async () => {
-    try {
-      const dataToSend: { response_data: { [key: string]: { [key: string]: string | string[] } } } = { response_data: {} };
+  const transformFormValues = (formValues: FormValues, formData: FormData) => {
+    const transformedData: any = { response_data: {} };
   
-      if (formData && typeof formData.schema !== 'string' && formData.schema.sections) {
-        formData.schema.sections.forEach((section: Section) => {
-          const sectionId = section.id;
-          const sectionLabel = section.sectionname;
+    if (formData.schema && typeof formData.schema !== "string" && formData.schema.sections) {
+      formData.schema.sections.forEach((section: Section) => {
+        const sectionName = section.sectionname;
+        transformedData.response_data[sectionName] = {};
   
-          dataToSend.response_data[sectionLabel] = {};
+        section.fields.forEach((field: Field) => {
+          const fieldLabel = field.label.trim(); // Trim the field label here
+          const fieldValue = formValues[sectionName]?.[fieldLabel];
   
-          section.fields.forEach((field: Field) => {
-            const fieldId = field.id;
-            const fieldLabel = field.label;
+          // Log to check if field values are being captured
+          console.log(`Field: ${fieldLabel}, Value: ${fieldValue}`);
   
-            const fieldValue = formValues[sectionId]?.[fieldId];
-            console.log(`Field: ${fieldLabel}, Value:`, fieldValue);
-  
-            if (fieldValue !== undefined && fieldValue !== "") {
-              if (Array.isArray(fieldValue)) {
-                dataToSend.response_data[sectionLabel][fieldLabel] = fieldValue;
-              } else {
-                dataToSend.response_data[sectionLabel][fieldLabel] = fieldValue;
-              }
-            } else {
-              console.log(`Field ${fieldLabel} has no value or is empty.`);
-            }
-          });
+          if (fieldValue !== undefined && fieldValue !== null && fieldValue !== "") {
+            transformedData.response_data[sectionName][fieldLabel] = fieldValue;
+          }
         });
+      });
+    }
   
-        console.log("Data to send:", dataToSend);
+    // Add sender information (assuming you have access to the logged-in user)
+    transformedData.sender = 'Admin';  // Replace with actual user ID if needed
   
-        if (Object.keys(dataToSend.response_data).length === 0) {
-          console.log("No data in response_data:", dataToSend.response_data);
-          throw new Error("No data found to submit.");
-        }
+    return transformedData;
+  };
   
+  
+
+  const handleConfirmSubmit = async (confirmed: boolean) => {
+    setIsConfirmationModalOpen(false);
+
+    if (confirmed) {
+      try {
+        // Log form values before transformation
+        console.log("Form values before transform:", JSON.stringify(formValues, null, 2));
+
+        const dataToSend = transformFormValues(formValues, formData!); // Transform data to match the required format
+        console.log("Data to send:", JSON.stringify(dataToSend, null, 2)); // Log transformed data
+
         const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/submit/`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(dataToSend),
         });
-  
+
         if (!response.ok) {
-          const errorText = await response.text();
-          throw new Error(`Failed to submit form: ${errorText}`);
+          throw new Error("Failed to submit form.");
         }
-  
+
         const responseData = await response.json();
-        console.log("Form submitted successfully:", responseData);
-        setIsModalOpen(true);
-      } else {
-        throw new Error("Invalid form data or schema.");
+        console.log("Form submitted successfully to server:", responseData);
+        setIsSubmitModalOpen(true);
+      } catch (error) {
+        console.error("Error submitting form:", error);
       }
-    } catch (error) {
-      console.error("Error submitting form:", error);
     }
   };
-  
 
-  const closeModal = () => {
-    setIsModalOpen(false);
-    navigate("/createForm"); // Redirect after closing the modal
+  // Open confirmation modal when ready to submit
+  const handleSubmit = () => {
+    console.log("Submit button clicked");
+    setIsConfirmationModalOpen(true);
   };
 
+  // Close success modal and navigate to a different page
+  const closeModal = () => {
+    setIsSubmitModalOpen(false);
+    navigate("/createForm");
+  };
+
+  // Render loading or the form if data exists
   if (!formData) {
     return <div>Loading form...</div>;
   }
@@ -177,85 +185,66 @@ const FormInputPage = () => {
     <div className="container mx-auto px-4 py-6">
       <h2 className="text-5xl font-bold text-[#040E46] mb-4">{formData.title}</h2>
 
-      {formData.schema && typeof formData.schema === "object" && "sections" in formData.schema ? (
-        formData.schema.sections.map((section: Section, sectionIndex) => {
+      {formData.schema && typeof formData.schema !== "string" && formData.schema.sections ? (
+        formData.schema.sections.map((section: Section, sectionIndex: number) => {
           const sectionId = section.id || `section-${sectionIndex}`;
           return (
             <div key={sectionId} className="mb-6">
               <h3 className="text-3xl font-semibold text-[#040E46]">{section.sectionname}</h3>
-              {section.fields.map((field: Field, fieldIndex) => {
+              {section.fields.map((field: Field, fieldIndex: number) => {
                 const fieldId = field.id || `${sectionId}-field-${fieldIndex}`;
                 return (
                   <div key={fieldId} className="mb-4">
                     <label className="block text-xl text-gray-700">{field.label}</label>
-
-                    {/* Render input based on field type */}
-                    {field.type === "text" || field.type === "number" || field.type === "email" || field.type === "date" ? (
+                    {field.type === "text" || field.type === "number" || field.type === "email" ? (
                       <input
                         type={field.type}
                         className="w-full p-2 border border-gray-300 rounded"
-                        value={formValues[sectionId]?.[fieldId] || ""}
-                        onChange={(e) => handleInputChange(sectionId, fieldId, e.target.value)}
+                        value={formValues[section.sectionname]?.[field.label.trim()] || ""}  // Trim here
+                        onChange={(e) => handleInputChange(section.sectionname, field.label.trim(), e.target.value)}  // Trim here
                       />
                     ) : field.type === "checkbox-group" ? (
                       <div className="text-[#040E46]">
-                        {parseOptions(field.options).map((option, index) => (
-                          <div key={index} className="flex items-center">
-                            <input
-                              type="checkbox"
-                              id={`${fieldId}-option-${index}`}
-                              value={option}
-                              checked={formValues[sectionId]?.[fieldId]?.includes(option) || false}
-                              onChange={(e) => {
-                                const currentValue = Array.isArray(formValues[sectionId]?.[fieldId])
-                                  ? formValues[sectionId]?.[fieldId]
-                                  : [];
-                                const updatedValue = e.target.checked
-                                  ? [...currentValue, option]
-                                  : currentValue.filter((v) => v !== option);
-                                handleInputChange(sectionId, fieldId, updatedValue);
-                              }}
-                            />
-                            <label htmlFor={`${fieldId}-option-${index}`} className="ml-2">
-                              {option}
-                            </label>
-                          </div>
-                        ))}
+                        {Array.isArray(field.options)
+                          ? field.options.map((option: string, index: number) => (
+                              <div key={index} className="flex items-center">
+                                <input
+                                  type="checkbox"
+                                  id={`${fieldId}-option-${index}`}
+                                  value={option}
+                                  checked={formValues[section.sectionname]?.[field.label.trim()]?.includes(option) || false}  // Trim here
+                                  onChange={(e) =>
+                                    handleCheckboxChange(section.sectionname, field.label.trim(), option, e.target.checked)  // Trim here
+                                  }
+                                />
+                                <label htmlFor={`${fieldId}-option-${index}`} className="ml-2">
+                                  {option}
+                                </label>
+                              </div>
+                            ))
+                          : null}
                       </div>
                     ) : field.type === "radio-group" ? (
                       <div className="text-[#040E46]">
-                        {parseOptions(field.options).map((option, index) => (
-                          <div key={index} className="flex items-center">
-                            <input
-                              type="radio"
-                              id={`${fieldId}-option-${index}`}
-                              name={fieldId}
-                              value={option}
-                              checked={formValues[sectionId]?.[fieldId] === option}
-                              onChange={(e) => handleInputChange(sectionId, fieldId, e.target.value)}
-                            />
-                            <label htmlFor={`${fieldId}-option-${index}`} className="ml-2">
-                              {option}
-                            </label>
-                          </div>
-                        ))}
+                        {Array.isArray(field.options)
+                          ? field.options.map((option: string, index: number) => (
+                              <div key={index} className="flex items-center">
+                                <input
+                                  type="radio"
+                                  id={`${fieldId}-option-${index}`}
+                                  name={fieldId}
+                                  value={option}
+                                  checked={formValues[section.sectionname]?.[field.label.trim()] === option}  // Trim here
+                                  onChange={() => handleInputChange(section.sectionname, field.label.trim(), option)}  // Trim here
+                                />
+                                <label htmlFor={`${fieldId}-option-${index}`} className="ml-2">
+                                  {option}
+                                </label>
+                              </div>
+                            ))
+                          : null}
                       </div>
-                    ) : field.type === "select" ? (
-                      <select
-                        className="w-full p-2 border border-gray-300 rounded text-[#040E46]"
-                        value={formValues[sectionId]?.[fieldId] || ""}
-                        onChange={(e) => handleInputChange(sectionId, fieldId, e.target.value)}
-                      >
-                        <option value="" disabled>Select an option</option>
-                        {parseOptions(field.options).map((option, index) => (
-                          <option key={index} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <div>Unsupported field type: {field.type}</div>
-                    )}
+                    ) : null}
                   </div>
                 );
               })}
@@ -263,27 +252,46 @@ const FormInputPage = () => {
           );
         })
       ) : (
-        <div>No sections found in this form.</div>
+        <div>No schema available.</div>
       )}
 
       <button
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        className="bg-blue-500 text-white px-6 py-3 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 pointer-events-auto"
         onClick={handleSubmit}
       >
         Submit
       </button>
 
-      {/* Success Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-50 flex items-center justify-center">
-          <div className="bg-white p-8 rounded-lg shadow-lg">
-            <h3 className="text-2xl font-bold text-green-500">Form Submitted Successfully!</h3>
+          {/* Confirmation Modal */}
+      {isConfirmationModalOpen && (
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-content bg-white p-6 rounded-lg shadow-lg text-blue-900">
+            <p>Are you sure you want to submit the form?</p>
             <div className="flex justify-center mt-4">
               <button
-                className="bg-blue-500 text-white px-4 py-2 rounded"
-                onClick={closeModal}
+                onClick={() => handleConfirmSubmit(true)}
+                className="bg-green-500 text-white px-4 py-2 rounded mx-2"
               >
-                OK
+                Yes
+              </button>
+              <button
+                onClick={() => handleConfirmSubmit(false)}
+                className="bg-red-500 text-white px-4 py-2 rounded mx-2"
+              >
+                No
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Success Modal */}
+            {isSubmitModalOpen && (
+        <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="modal-content bg-white p-6 rounded-lg shadow-lg text-blue-900">
+            <p>Form submitted successfully!</p>
+            <div className="flex justify-center mt-5">
+              <button onClick={closeModal} className="bg-blue-500 text-white px-4 py-2 rounded">
+                Close
               </button>
             </div>
           </div>

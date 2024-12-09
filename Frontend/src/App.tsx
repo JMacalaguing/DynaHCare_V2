@@ -1,6 +1,5 @@
 import { Route, Routes, useLocation } from "react-router-dom";
 import PatientPage from "./pages/PatientPage";
-import PatientName from "./pages/PatientName";
 import ConsultationPage from "./pages/ConsultationPage";
 import Sidebar from "./Components/Sidebar";
 import LoginPage from "./pages/LoginPage";
@@ -11,6 +10,8 @@ import MaternalCare from "./pages/MaternalCare";
 import Tuberculosis from "./pages/Tuberculosis";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import FormInputPage from "./Components/FormInputPage";
+import UserPage from "./pages/UserPage";
+import PatientList from "./pages/patientlist";
 
 
 
@@ -68,14 +69,6 @@ function App() {
           }
         />
         <Route
-          path="/child-care"
-          element={
-            <ProtectedRoute>
-              <PatientName />
-            </ProtectedRoute>
-          }
-        />
-        <Route
           path="/maternal-care"
           element={
             <ProtectedRoute>
@@ -94,6 +87,15 @@ function App() {
      
     
          <Route path="/form/:formId" element={<FormInputPage />} />
+         <Route
+          path="/UserPage"
+          element={
+            <ProtectedRoute>
+              <UserPage />
+            </ProtectedRoute>
+          }
+        />
+         <Route path="/patients" element={<PatientList />} />
       </Routes>
     </div>
   );

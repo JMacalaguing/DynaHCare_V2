@@ -21,7 +21,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
   const [passwordVisible, setPasswordVisible] = useState(false); // Manage visibility
   const [modalVisible, setModalVisible] = useState(false); // Manage popup visibility
   const [modalMessage, setModalMessage] = useState(""); // Message for the popup
-  const baseUrl = "";
+
 
   const handleLogin = async () => {
     if (!email || !password) {

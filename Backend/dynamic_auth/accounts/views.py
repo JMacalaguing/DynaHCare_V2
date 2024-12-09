@@ -3,9 +3,12 @@ from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+
+from accounts.serializers import CustomUserSerializer
 from .models import CustomUser
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import make_password
+from django.shortcuts import get_object_or_404
 
 class UserSignupView(APIView):
     permission_classes = [AllowAny]
@@ -113,5 +116,28 @@ class AdminLoginView(APIView):
             return Response({'message': 'Admin login successful', 'token': token.key})
 
         return Response({'error': 'Invalid credentials or not an admin'}, status=401)
-    
 
+class UpdateUserStatusView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        user_id = request.data.get("user_id")
+        status = request.data.get("status")
+
+        if status not in dict(CustomUser.STATUS_CHOICES).keys():
+            return Response({"error": "Invalid status"}, status=400)
+
+        user = get_object_or_404(CustomUser, id=user_id)
+        user.status = status
+        user.save()
+
+        return Response({"message": f"User status updated to {status}"})
+    
+class UserListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        # Filter users who are not staff
+        users = CustomUser.objects.filter(is_staff=False)
+        serializer = CustomUserSerializer(users, many=True)
+        return Response({"users": serializer.data})

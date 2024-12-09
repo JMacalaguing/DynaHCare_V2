@@ -9,6 +9,7 @@ import { StatusBar, SafeAreaView } from "react-native";
 import { FormDetailsScreen } from "./FormDetailsScreen";
 import FormInputScreen from "./FormInputScreen";
 import { LocalStorage } from "./LocalStorage";
+import { Consultation } from "./Consultation";
 
 
 const Stack = createStackNavigator();
@@ -27,6 +28,7 @@ export default function App() {
         <Stack.Screen name="FormDetails" component={FormDetailsScreen}/>
         <Stack.Screen name="FormInput" component={FormInputScreen}/>
         <Stack.Screen name="local" component={LocalStorage}/>
+        <Stack.Screen name="Consult" component={Consultation}/>
       </Stack.Navigator>
     </SafeAreaView>
   );

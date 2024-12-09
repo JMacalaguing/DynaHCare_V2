@@ -64,7 +64,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
         </View>
         <View className="">
           {[
-            { name: "Home", icon: "home-outline" },
+            { name: "Forms", icon: "home-outline" },
+            { name: "Consultation LogBook", icon: "newspaper-outline", action: () => navigation.navigate("Consult") },
             { name: "Local Storage", icon: "file-tray-stacked-outline" },
             { name: "Log Out", icon: "log-out-outline", action: () => navigation.navigate("Login") },
           ].map((item) => (
@@ -97,4 +98,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </View>
   );
 };
+
 

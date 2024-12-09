@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-import os
+
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-&^(02@ahovap_h-ptgzk5^jg!)fl11832g+el&fqvt2s1j$q9_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.2', 'http://localhost:5173/', '192.168.1.10:8081']
+ALLOWED_HOSTS = ['192.168.1.15', 'http://localhost:5173/']
 
 # Application definition
 
@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'dynamic_forms',
     'formbuilder',
+    'logbook'
 ]
 
 MIDDLEWARE = [
@@ -147,5 +148,5 @@ REST_FRAMEWORK = {
 }
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  # Ensure this is present
+    'django.contrib.auth.backends.ModelBackend',  
 ]

@@ -81,3 +81,4 @@ export const Header = ({ title, navigation }: HeaderProps) => {
     </View>
   );
 };
+

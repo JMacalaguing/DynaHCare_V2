@@ -40,6 +40,11 @@ class ResponseViewSet(viewsets.ModelViewSet):
             )
 
 
+from rest_framework.response import Response as DRFResponse
+from rest_framework.views import APIView
+from rest_framework import status
+from .models import Form, FormResponse
+
 class SubmitFormResponse(APIView):
     permission_classes = [AllowAny]
 
@@ -47,6 +52,7 @@ class SubmitFormResponse(APIView):
         try:
             form = Form.objects.get(id=form_id)
             response_data = request.data.get("response_data")
+            sender_name = request.data.get("sender", "")  # Get the sender as a string
 
             if not response_data:
                 return DRFResponse(
@@ -54,8 +60,8 @@ class SubmitFormResponse(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Create and save the response
-            form_response = FormResponse(form=form, response_data=response_data)
+            # Create and save the response, with sender as a string
+            form_response = FormResponse(form=form, response_data=response_data, sender=sender_name)
             form_response.save()
 
             # Serialize and respond
