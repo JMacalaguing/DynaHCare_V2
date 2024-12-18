@@ -1,3 +1,4 @@
+from .models import Template
 from rest_framework import serializers
 from .models import Form, FormResponse  # Updated imports
 from dynamic_forms.models import FormField  # Assuming FormField is correctly defined
@@ -8,10 +9,11 @@ class FormSerializer(serializers.ModelSerializer):
     Handles the title and schema fields.
     """
     schema = serializers.JSONField()  # Serializes the schema field as JSON
+    status = serializers.CharField(max_length=50, required=False)
 
     class Meta:
         model = Form
-        fields = ['id', 'title', 'schema','description']
+        fields = ['id', 'title', 'schema','description','status']
 
 class FormResponseSerializer(serializers.ModelSerializer):
     """
@@ -25,3 +27,8 @@ class FormResponseSerializer(serializers.ModelSerializer):
     class Meta:
         model = FormResponse
         fields = ['id', 'form', 'response_data', 'date', 'sender']
+
+class TemplateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Template
+        fields = ['id', 'templatename', 'title', 'schema', 'description']

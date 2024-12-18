@@ -4,4 +4,4 @@ from .models import LogEntry
 class LogEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = LogEntry
-        fields = ['id', 'name', 'date', 'created_at']
+        fields = ['id', 'name', 'date', 'type_of_consultation', 'created_at']

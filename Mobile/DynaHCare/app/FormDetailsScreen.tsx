@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import { View, Text, TouchableOpacity, ActivityIndicator, Alert, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import config from "./config";
 
@@ -43,23 +43,28 @@ export function FormDetailsScreen({ route, navigation }: { route: any; navigatio
   return (
     <View className="flex-1 bg-blue-100">
       {/* Header */}
-      <View className="flex-row items-center px-4 py-4 bg-white shadow-md">
+      <View className="flex-row items-center px-4 py-4 shadow-md">
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back-outline" size={28} color="#003366" />
         </TouchableOpacity>
-        <Text className="text-2xl font-bold text-blue-800 ml-4">View Form</Text>
+        <Text className="text-2xl font-bold text-blue-800 ml-4">Form Information</Text>
       </View>
 
       {/* Form Details */}
       <View className="m-5 p-4 bg-white rounded-lg shadow-md">
-        <Text className="text-lg font-bold text-blue-900 mb-2">Form Title</Text>
+        <Text className="text-lg font-bold text-blue-900">Form Title</Text>
         <View className="shadow-md rounded-md p-8 ">
-          <Text className="font-bold">{form.title}</Text>
+          <Text className="">{form.title}</Text>
         </View>
 
-        <Text className="text-lg font-bold text-blue-900 mb-2">Description</Text>
-        <View className="shadow-md rounded-md p-12 mb-4">
-          <Text>{form.description || "No description available"}</Text>
+        <Text className="text-lg font-bold text-blue-900 ">Description</Text>
+        <View className="shadow-md rounded-md p-8 mb-4">
+          <Text className="">{form.description || "No description available"}</Text>
+        </View>
+
+        <Text className="text-lg font-bold text-blue-900 ">Status</Text>
+        <View className="shadow-md rounded-md p-8 mb-4">
+          <Text className="">{form.status || "No description available"}</Text>
         </View>
       </View>
     </View>

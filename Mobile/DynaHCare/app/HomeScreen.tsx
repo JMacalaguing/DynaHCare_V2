@@ -105,20 +105,27 @@ export function HomeScreen({ navigation }: { navigation: any }) {
               {/* Form Details (Clickable Area) */}
               <TouchableOpacity
                 onPress={() => navigation.navigate("FormInput", { formId: item.id })} // Pass only formId
+                style={{ flex: 1, marginRight: 10 }} // Ensure it takes the remaining space
               >
-                <View className="flex-row">
-                <Ionicons name="document-text" size={28} color="#1e40af" /> 
-                  <Text className="text-2xl font-bold text-blue-800 ml-3">{item.title}</Text>
+                <View className="flex-row items-center">
+                  <Ionicons name="document-text" size={28} color="#1e40af" />
+                  <Text
+                    className="text-2xl font-bold text-blue-800 ml-3"
+                    numberOfLines={1} // Limit to one line
+                    ellipsizeMode="tail" // Show ellipses if text is too long
+                  >
+                    {item.title}
+                  </Text>
                 </View>
               </TouchableOpacity>
-
+          
               {/* "View" Button */}
-             <TouchableOpacity
+              <TouchableOpacity
                 className="bg-blue-800 rounded-full px-4 py-2 ml-2"
                 onPress={() => navigation.navigate("FormDetails", { formId: item.id })} // Pass formId
-               >
+              >
                 <Text className="text-white font-bold">Details</Text>
-            </TouchableOpacity>
+              </TouchableOpacity>
             </View>
           )}
         />
@@ -127,4 +134,5 @@ export function HomeScreen({ navigation }: { navigation: any }) {
   );
 }
 
+export default  HomeScreen;
 

@@ -5,8 +5,7 @@ import { LogOutIcon, Menu, ClipboardList, LayoutDashboardIcon, NotebookPen, User
 import { AnimatePresence, motion } from "framer-motion";
 
 const SIDEBAR_ITEMS = [
-    { name: "Dashboard", icon: LayoutDashboardIcon, color: "#040E46", href: "/dashboardPage" },
-    { name: "Patient", icon: Users, color: "#040E46", href: "/patientPage" },
+    { name: "Dashboard", icon: LayoutDashboardIcon, color: "#040E46", href: "/patientPage" },
     { name: "Consultation Logbook", icon: ClipboardList, color: "#040E46", href: "/consultationPage" },
     { name: "Create Form", icon: NotebookPen, color: "#040E46", href: "/createForm" },
     { name: "User Management", icon: Users, color: "#040E46", href: "/UserPage" },

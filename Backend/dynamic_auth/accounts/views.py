@@ -141,3 +141,23 @@ class UserListView(APIView):
         users = CustomUser.objects.filter(is_staff=False)
         serializer = CustomUserSerializer(users, many=True)
         return Response({"users": serializer.data})
+
+class DeleteUserView(APIView):
+    permission_classes = [AllowAny]
+    
+    def delete(self, request, user_id):
+        try:
+            # Attempt to retrieve the user by ID
+            user = CustomUser.objects.get(id=user_id)
+            
+            # Delete the user
+            user.delete()
+            return Response("User deleted successfully")
+
+        except CustomUser.DoesNotExist:
+            # Handle case where the user does not exist
+            return Response("User not found")
+        except Exception as e:
+            # Catch any other errors and log them
+            print(f"Error deleting user: {e}")  # For debugging purposes
+            return Response("Internal server error")

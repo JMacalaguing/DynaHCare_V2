@@ -167,3 +167,5 @@ export function LoginScreen({ navigation }: { navigation: any }) {
     </LinearGradient>
   );
 }
+
+export default  LoginScreen;

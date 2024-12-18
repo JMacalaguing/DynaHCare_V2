@@ -1,90 +1,70 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { LinearGradient } from 'expo-linear-gradient';
-import { View, Text, TextInput, TouchableOpacity, Modal, Alert, Platform, } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Modal, Alert, Platform } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { Header } from './Header2';
+import { Ionicons } from '@expo/vector-icons';
+import { Header } from './Header3';
 import { createTable, saveData } from './ConssultationDB';  // Import the database functions
 import config from './config';
-import { Picker } from '@react-native-picker/picker';
-import { Ionicons } from '@expo/vector-icons';
 
-export function Consultation({ navigation }: { navigation: any }) {
+export function PatientEnrollment({ navigation }: { navigation: any }) {
   const [name, setName] = useState('');
   const [date, setDate] = useState<Date | null>(null);
-  const [typeOfConsultation, setTypeOfConsultation] = useState('');
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isConfirmationModalVisible, setIsConfirmationModalVisible] = useState(false);
   const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
   const [isSaveLocalModalOpen, setIsSaveLocalModalOpen] = useState(false);
 
-  const consultationOptions = [
-    'General',
-    'Dental Care',
-    'Child Nutrition',
-    'Adult Immunization',
-    'Postpartum',
-    'Child Immunization',
-    'Firecracker Injury',
-    'COVID',
-    'Prenatal',
-    'Child Care',
-    'Injury',
-    'Family Planning',
-    'Tuberculosis',
-    'Sick Children',
-    'Animal Bite',
-  ];
-
   // Function to reset the form fields
   const resetForm = () => {
     setName('');
     setDate(null);
-    setTypeOfConsultation('');
   };
 
   // Function to handle submission to the server
-    const handleSubmitToServer = async () => {
-      setIsSaveLocalModalOpen(false)
-      const apiUrl = `${config.BASE_URL}/api/logbook/`;
-      const payload = { name, date: date?.toISOString().split('T')[0] };
-  
-      try {
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        });
-  
-        if (response.ok) {
-          setIsSuccessModalVisible(true); // Show success modal
-          setIsConfirmationModalVisible(false); // Hide confirmation modal
-          resetForm(); // Reset the form fields after successful submission
-        } else {
-          Alert.alert('Error', 'Failed to submit data to the server');
-        }
-      } catch (error) {
-        Alert.alert('Error', 'Something went wrong while submitting');
-        console.error(error);
+  const handleSubmitToServer = async () => {
+    setIsSaveLocalModalOpen(false)
+    const apiUrl = `${config.BASE_URL}/api/logbook/`;
+    const payload = { name, date: date?.toISOString().split('T')[0] };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      if (response.ok) {
+        setIsSuccessModalVisible(true); // Show success modal
+        setIsConfirmationModalVisible(false); // Hide confirmation modal
+        resetForm(); // Reset the form fields after successful submission
+      } else {
+        Alert.alert('Error', 'Failed to submit data to the server');
       }
-    };
-    // Function to handle saving data locally
-    const saveLocal = () => {
-      if (!name || !date) {
-        Alert.alert('Error', 'Please fill in both name and date');
-        return;
-      }
-  
-      const formData = { name, date: date.toISOString() };
-      
-      // Save the form data to the local SQLite database
-      saveData(formData);
-      setIsSaveLocalModalOpen(false);  // Close the modal after saving
-      resetForm();  // Reset form after saving
-      Alert.alert('Success', 'Data saved locally');
-      setIsConfirmationModalVisible(false);
-    };
+    } catch (error) {
+      Alert.alert('Error', 'Something went wrong while submitting');
+      console.error(error);
+    }
+  };
+  // Function to handle saving data locally
+  const saveLocal = () => {
+    if (!name || !date) {
+      Alert.alert('Error', 'Please fill in both name and date');
+      return;
+    }
+
+    const formData = { name, date: date.toISOString() };
+    
+    // Save the form data to the local SQLite database
+    saveData(formData);
+    setIsSaveLocalModalOpen(false);  // Close the modal after saving
+    resetForm();  // Reset form after saving
+    Alert.alert('Success', 'Data saved locally');
+    setIsConfirmationModalVisible(false);
+  };
+
   // Function to handle date change
   const onChangeDate = (event: any, selectedDate?: Date) => {
     setShowDatePicker(false); // Close the date picker
@@ -105,11 +85,11 @@ export function Consultation({ navigation }: { navigation: any }) {
       end={{ x: 0, y: 1 }}
       className="flex-1"
     >
-      <Header title="Consultation" navigation={navigation} />
+      <Header title="Patient Enrollment Record" navigation={navigation} />
 
-      <View className="flex-1 items-center justify-center px-4 mt-[-200]">
+      <View className="flex-1 items-center justify-center px-4 mt-[-300]">
         <View className="bg-white w-full rounded-lg shadow-lg p-6">
-          <Text className="text-xl font-bold text-white bg-[#040E46] p-3 rounded-t-lg">LogBook</Text>
+          <Text className="text-xl font-bold text-white bg-[#040E46] p-3 rounded-t-lg">Patient Information</Text>
           <View className="p-4">
             <Text className="text-base font-medium text-gray-700 mb-2">Name of the Patient</Text>
             <TextInput
@@ -137,19 +117,6 @@ export function Consultation({ navigation }: { navigation: any }) {
                 onChange={onChangeDate}
               />
             )}
-
-            <Text className="text-base font-medium text-gray-700 mt-4 mb-2">Type of Consultation</Text>
-            <View className="w-full p-3 border border-gray-300 rounded-md bg-white">
-              <Picker
-                selectedValue={typeOfConsultation}
-                onValueChange={(itemValue) => setTypeOfConsultation(itemValue)}
-              >
-                <Picker.Item label="Select type of consultation" value="" />
-                {consultationOptions.map((option) => (
-                  <Picker.Item key={option} label={option} value={option} />
-                ))}
-              </Picker>
-            </View>
           </View>
         </View>
 
@@ -161,8 +128,8 @@ export function Consultation({ navigation }: { navigation: any }) {
         </TouchableOpacity>
       </View>
 
-  {/* Confirmation Modal */}
-  <Modal transparent={true} visible={isConfirmationModalVisible} animationType="fade">
+      {/* Confirmation Modal */}
+      <Modal transparent={true} visible={isConfirmationModalVisible} animationType="fade">
         <View className="flex-1 justify-center items-center bg-gray-500/60 mt-[-150]">
           <View className="bg-white p-6 rounded-lg shadow-lg">
             <Text className="text-lg font-semibold text-gray-800 mb-4">Are you sure you want to submit it?</Text>

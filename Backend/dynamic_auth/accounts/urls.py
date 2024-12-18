@@ -10,5 +10,6 @@ urlpatterns = [
     path('approve/', views.CheckApprovalStatusView.as_view(), name='check_approval'),
     path('update-status/', views.UpdateUserStatusView.as_view(), name='update-status'),
     path('user-list/', views.UserListView.as_view(), name='user_list'),
+     path('delete-user/<int:user_id>/', views.DeleteUserView.as_view(), name='delete-user'),
   
 ]

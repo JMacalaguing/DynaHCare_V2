@@ -79,11 +79,11 @@ export const Header = ({ title, navigation }: HeaderProps) => {
               className="flex-row items-center mt-6 py-2 px-4"
               onPress={() => {
                 setSidebarVisible(false); // Close the sidebar
-                navigation.navigate("Log"); // Navigate to homeScreen
+                navigation.navigate("Enrollment"); // Navigate to homeScreen
               }}
             >
               <Ionicons name="file-tray-stacked-outline" size={24} color="#003366" />
-              <Text className="ml-2 text-lg text-blue-800">Log Local Storage</Text>
+              <Text className="ml-2 text-lg text-blue-800">Enrollment Local Storage</Text>
             </TouchableOpacity>
           </View>
         </View>

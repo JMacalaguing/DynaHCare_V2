@@ -12,6 +12,7 @@ import { LocalStorage } from "./LocalStorage";
 import { Consultation } from "./Consultation";
 import { AuthProvider, useAuth } from "./AuthContext"; 
 import { LogStorage } from "./LogStorage";
+import { PatientEnrollment } from "./PatientEnrollment";
 
 const Stack = createStackNavigator();
 
@@ -25,6 +26,7 @@ function AppNavigator() {
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
+            <Stack.Screen name="Enrollment" component={PatientEnrollment} />
             <Stack.Screen name="FormDetails" component={FormDetailsScreen} />
             <Stack.Screen name="FormInput" component={FormInputScreen} />
             <Stack.Screen name="local" component={LocalStorage} />

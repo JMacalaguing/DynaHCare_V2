@@ -82,3 +82,5 @@ export const Header = ({ title, navigation }: HeaderProps) => {
   );
 };
 
+export default  Header;
+

@@ -1,11 +1,12 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import FormViewSet, ResponseViewSet, SubmitFormResponse
+from .views import FormViewSet, ResponseViewSet, SubmitFormResponse, TemplateViewSet
 
 # Create a router and register the viewsets
 router = DefaultRouter()
 router.register(r'forms', FormViewSet, basename='form')
 router.register(r'responses', ResponseViewSet, basename='response')
+router.register(r'templates', TemplateViewSet)
 
 # Define the URL patterns for the app
 urlpatterns = [

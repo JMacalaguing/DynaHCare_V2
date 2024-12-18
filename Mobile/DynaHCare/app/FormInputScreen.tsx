@@ -6,12 +6,18 @@ import config from "./config";
 import { Ionicons } from "@expo/vector-icons";
 import { createTable, saveData } from './database'; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Picker } from '@react-native-picker/picker';
+import { RadioButton } from 'react-native-paper';
+import CustomSelect from "./CustomSelect";
+
 
 interface Field {
   id: string;
   label: string;
   type: string;
   options?: string | string[];
+  description: string;
+  required:boolean;
 }
 
 interface Section {
@@ -108,26 +114,38 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
     }));
   };
 
+  
+
   const parseOptions = (options: string | string[] | undefined): string[] => {
+    console.log("Field options:", options);  // Debug: Log options received
     if (!options) return [];
     if (Array.isArray(options)) return options;
-    return options.split(",").map((opt) => opt.trim());
+  
+    const parsedOptions = options.split(",").map((opt) => opt.trim());
+    return parsedOptions;
   };
 
   const handleSubmit = () => {
     // Validate the form to ensure all required fields are filled
-    const hasEmptyFields = Object.values(formValues).some((section) => {
-      return Object.values(section).some((fieldValue) => {
-        // Check if field is empty
-        if (typeof fieldValue === 'string') {
-          return fieldValue.trim() === '';
-        }
-        if (Array.isArray(fieldValue)) {
-          return fieldValue.length === 0;
-        }
-        return false;
+    let hasEmptyFields = false;
+  
+    if (formData?.schema && typeof formData.schema === "object" && "sections" in formData.schema) {
+      // Iterate through sections and fields to validate required fields
+      formData.schema.sections.forEach((section) => {
+        section.fields.forEach((field) => {
+          if (field.required) {
+            const fieldValue = formValues[section.sectionname]?.[field.label];
+  
+            if (
+              (typeof fieldValue === "string" && fieldValue.trim() === "") || // Text, number, email, or date
+              (Array.isArray(fieldValue) && fieldValue.length === 0) // Checkbox group
+            ) {
+              hasEmptyFields = true;
+            }
+          }
+        });
       });
-    });
+    }
   
     if (hasEmptyFields) {
       alert("Please fill in all required fields before submitting.");
@@ -135,6 +153,7 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
       setIsConfirmationModalOpen(true); // Open the confirmation modal if all fields are filled
     }
   };
+  
   
 
   const SaveLocal = (confirmed: boolean) => {
@@ -226,10 +245,9 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
       </View>
     );
   }
-
+  
   return (
-    <ScrollView className="flex-1 bg-blue-100">
-      {/* Header */}
+      <View className="flex-1 bg-blue-100 pb-5">
       <View className="flex-row items-center justify-between px-4 py-4 bg-white shadow-md">
         <TouchableOpacity onPress={() => navigation.navigate("Home")}>
           <Ionicons name="arrow-back-outline" size={28} color="#040E46" />
@@ -237,71 +255,106 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
         <Text className="text-2xl font-extrabold text-blue-900 ml-3 flex-1">
           {formData.title}
         </Text>
-      </View>
+        </View>
+      
+    <ScrollView className="">
 
-      {/* Form Sections */}
-      {formData.schema && typeof formData.schema === "object" && "sections" in formData.schema ? (
-        formData.schema.sections.map((section: Section) => {
-          const sectionName = section.sectionname;
+     {/* Form Sections */}
+{formData.schema && typeof formData.schema === "object" && "sections" in formData.schema ? (
+  formData.schema.sections.map((section: Section) => {
+    const sectionName = section.sectionname;
+    return (
+      <View key={sectionName} className="bg-white shadow-md rounded-lg m-4 p-4">
+        <View className="text-xl font-bold text-white bg-[#040E46] p-3 rounded-t-lg mb-5">
+          <Text className="text-xl font-bold text-white ">
+            {sectionName}
+          </Text>
+        </View>
+        {section.fields.map((field: Field) => {
+          const fieldLabel = field.label;
           return (
-            <View key={sectionName} className="bg-white shadow-md rounded-lg m-4 p-4">
-              <View className="bg-[#050f49] m-[-15] p-2 mb-2 rounded-xl">
-                <Text className="text-xl font-bold mb-2 text-white ml-3">
-                  {sectionName}
+            <View key={fieldLabel} className="px-4 pb-4">
+              <Text className="text-lg font-medium text-gray-700 ">
+                {fieldLabel}
+                {field.required && <Text style={{ color: 'red', fontSize: 25 }}>*</Text>} {/* Add red asterisk for required fields */}
+              </Text>
+              {field.description && (
+                <Text className="text-gray-500 mb-1 text-xs font-style: italic">
+                  {field.description}
                 </Text>
-              </View>
-              {section.fields.map((field: Field) => {
-                const fieldLabel = field.label;
-                return (
-                  <View key={fieldLabel} className="mb-3">
-                    <Text className="text-base font-bold mb-1 text-[#050f49]">
-                      {fieldLabel}
-                    </Text>
-                    {field.type === "text" || field.type === "number" || field.type === "email" || field.type === "date" ? (
-                      <TextInput
-                        className="border-2 border-blue-200 p-3 rounded-xl"
-                        keyboardType={field.type === "number" ? "numeric" : "default"}
-                        value={
-                          Array.isArray(formValues[sectionName]?.[fieldLabel])
-                            ? formValues[sectionName]?.[fieldLabel].join(", ")
-                            : formValues[sectionName]?.[fieldLabel] || ""
-                        }
-                        onChangeText={(value) => handleInputChange(sectionName, fieldLabel, value)}
+              )}
+              {field.type === "text" || field.type === "number" || field.type === "email" || field.type === "date" ? (
+                <TextInput
+                  className="w-full p-3 border border-gray-300 rounded-md"
+                  keyboardType={field.type === "number" ? "numeric" : "default"}
+                  value={Array.isArray(formValues[sectionName]?.[fieldLabel])
+                    ? formValues[sectionName]?.[fieldLabel].join(", ")
+                    : formValues[sectionName]?.[fieldLabel] || ""}
+                  onChangeText={(value) => handleInputChange(sectionName, fieldLabel, value)}
+                />
+              ) : field.type === "checkbox-group" ? (
+                <View>
+                  {parseOptions(field.options).map((option, index) => (
+                    <View key={index} className="flex-row items-center mb-2">
+                      <Checkbox
+                        value={formValues[sectionName]?.[fieldLabel]?.includes(option) || false}
+                        onValueChange={(checked) => {
+                          const currentValue = Array.isArray(formValues[sectionName]?.[fieldLabel])
+                            ? formValues[sectionName]?.[fieldLabel]
+                            : [];
+                          const updatedValue = checked
+                            ? [...currentValue, option]
+                            : currentValue.filter((v) => v !== option);
+                          handleInputChange(sectionName, fieldLabel, updatedValue);
+                        }}
                       />
-                    ) : field.type === "checkbox-group" ? (
-                      <View>
-                        {parseOptions(field.options).map((option, index) => (
-                          <View key={index} className="flex-row items-center mb-2">
-                            <Checkbox
-                              value={formValues[sectionName]?.[fieldLabel]?.includes(option) || false}
-                              onValueChange={(checked) => {
-                                const currentValue = Array.isArray(formValues[sectionName]?.[fieldLabel])
-                                  ? formValues[sectionName]?.[fieldLabel]
-                                  : [];
-                                const updatedValue = checked
-                                  ? [...currentValue, option]
-                                  : currentValue.filter((v) => v !== option);
-                                handleInputChange(sectionName, fieldLabel, updatedValue);
-                              }}
-                            />
-                            <Text className="ml-2">{option}</Text>
-                          </View>
-                        ))}
-                      </View>
-                    ) : null}
-                  </View>
-                );
-              })}
+                      <Text className="ml-2">{option}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : field.type === "select" ? (
+                // Debugging: Log the options and selected value
+                console.log("Field options:", field.options),
+                console.log("Selected value:", formValues[sectionName]?.[fieldLabel]),
+                <CustomSelect
+                label={fieldLabel}
+                options={parseOptions(field.options)} // Log parsed options
+                selectedValue={Array.isArray(formValues[sectionName]?.[fieldLabel]) 
+                  ? formValues[sectionName]?.[fieldLabel]?.[0] || "" // Handle array
+                  : formValues[sectionName]?.[fieldLabel] || ""} // Handle single string
+                onSelect={(value) => handleInputChange(sectionName, fieldLabel, value)} // Handle select
+              />
+              ) : field.type === "radio-group" ? (
+                <View>
+                  {parseOptions(field.options).map((option, index) => (
+                    <View key={index} className="flex-row items-center mb-2">
+                      <RadioButton
+                        value={option}
+                        status={formValues[sectionName]?.[fieldLabel] === option ? 'checked' : 'unchecked'}
+                        onPress={() => {
+                          console.log(`Radio button selected: ${option}`);  // Debugging log
+                          handleInputChange(sectionName, fieldLabel, option);
+                        }}
+                      />
+                      <Text className="ml-2">{option}</Text>
+                    </View>
+                  ))}
+                </View>
+              ) : null}
             </View>
           );
-        })
-      ) : (
-        <Text className="text-lg font-semibold text-center mt-4">No sections found for this form.</Text>
-      )}
+        })}
+      </View>
+    );
+  })
+) : (
+  <Text className="text-lg font-semibold text-center mt-4">No sections found for this form.</Text>
+)}
+
 
         {/* Submit Button */}
-      <TouchableOpacity className="bg-[#040E46] m-4 p-3 rounded-3xl" onPress={handleSubmit}>
-              <Text className="text-white text-center text-xl font-extrabold">Submit</Text>
+      <TouchableOpacity className="bg-[#040E46] mt-2 mx-20 py-3 rounded-lg " onPress={handleSubmit}>
+              <Text className="text-white text-center text-xl font-semibold">Submit</Text>
             </TouchableOpacity>
 
       {/* Modals */}
@@ -372,6 +425,7 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
           </View>
         </Modal>
     </ScrollView>
+    </View>
   );
 };
 

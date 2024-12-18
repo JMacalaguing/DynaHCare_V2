@@ -6,14 +6,12 @@ import LoginPage from "./pages/LoginPage";
 import DashboardExample from "./pages/DashboardPage";
 import Createform from "./pages/CreateformPage";
 import FormPage from "./pages/FormPage";
-import MaternalCare from "./pages/MaternalCare";
-import Tuberculosis from "./pages/Tuberculosis";
 import ProtectedRoute from "./pages/ProtectedRoute";
 import FormInputPage from "./Components/FormInputPage";
 import UserPage from "./pages/UserPage";
-import PatientList from "./pages/patientlist";
-
-
+import PatientList from "./pages/PatientList";
+import DynamicForm from "./pages/DynamicForm";
+import EditForm from "./pages/EditForm";
 
 function App() {
   const location = useLocation();
@@ -69,25 +67,15 @@ function App() {
           }
         />
         <Route
-          path="/maternal-care"
+          path="/dynamicform"
           element={
             <ProtectedRoute>
-              <MaternalCare />
+              <DynamicForm template={location.state?.template} />
             </ProtectedRoute>
           }
         />
+        <Route path="/form/:formId" element={<FormInputPage />} />
         <Route
-          path="/Tuberculosis-program"
-          element={
-            <ProtectedRoute>
-              <Tuberculosis />
-            </ProtectedRoute>
-          }
-        />
-     
-    
-         <Route path="/form/:formId" element={<FormInputPage />} />
-         <Route
           path="/UserPage"
           element={
             <ProtectedRoute>
@@ -95,7 +83,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-         <Route path="/patients" element={<PatientList />} />
+        <Route path="/patients" element={<PatientList />} />
+        <Route path="/editForm" element={<EditForm formData={location.state?.formData} />} />
       </Routes>
     </div>
   );

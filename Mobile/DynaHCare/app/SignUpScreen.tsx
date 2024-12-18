@@ -208,3 +208,5 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
     </LinearGradient>
   );
 }
+
+export default  SignUpScreen;

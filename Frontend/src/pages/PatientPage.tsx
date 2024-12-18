@@ -75,7 +75,7 @@ export default function Home() {
     fetchForms();
   }, []);
 
-  const fetchPatients = async (form: Form) => {
+  const fetchFormDetails = async (form: Form) => {
     try {
       setLoading(true);
       const response = await fetch(RESPONSES_API);
@@ -83,40 +83,24 @@ export default function Home() {
 
       const filteredResponses = data.filter((response) => response.form === form.id);
 
-      const nameField = form.schema.sections
-        .flatMap((section) => section.fields)
-        .find((field) => field.label.trim().toLowerCase().includes("name"));
-
-      const extractedPatients = filteredResponses.map((response) => {
-        const sectionData = Object.values(response.response_data).find((section) =>
-          Object.keys(section).includes(nameField?.label || "")
-        );
-
-        const patientName = sectionData ? sectionData[nameField?.label || ""] : "Unknown Patient";
-        const patientDate = response.date; // Date from the response
-        const senderName = response.sender; // Sender from the response
-
-        return {
-          name: patientName,
-          date: patientDate,
-          sender: senderName
-        };
-      });
+      if (filteredResponses.length === 0) {
+        setIsModalOpen(true); // Show modal if no responses found
+      } else {
+        navigate("/patients", {
+          state: {
+            form,
+            responses: filteredResponses,
+          },
+        });
+      }
 
       setLoading(false);
-
-      if (extractedPatients.length === 0) {
-        setIsModalOpen(true); // Show modal if no patients found
-      } else {
-        navigate("/patients", { state: { form, patients: extractedPatients } });
-      }
     } catch (error) {
-      console.error("Error fetching patients:", error);
+      console.error("Error fetching form details:", error);
       setLoading(false);
     }
   };
 
-  // Get current date
   const currentDate = new Date().toLocaleDateString();
 
   return (
@@ -160,7 +144,7 @@ export default function Home() {
             {forms.map((form) => (
               <button
                 key={form.id}
-                onClick={() => fetchPatients(form)}
+                onClick={() => fetchFormDetails(form)}
                 className="flex h-32 items-center justify-center rounded-lg bg-gradient-to-t from-sky-400 to-emerald-300 p-6 text-center text-lg font-semibold text-white transition-all transform hover:scale-105 hover:shadow-lg shadow-lg"
               >
                 {form.title}
@@ -173,8 +157,9 @@ export default function Home() {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        message="No patients are associated with the selected form. Please try another form."
+        message="No data found for the selected form. Please try another form."
       />
     </div>
   );
 }
+

@@ -142,3 +142,4 @@ export function LocalStorage({ navigation }: { navigation: any }) {
     </LinearGradient>
   );
 }
+export default  LocalStorage;

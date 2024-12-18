@@ -74,6 +74,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
               icon: "home-outline"
             },
             {
+              name: "Patient Enrollment",
+              icon: "people-outline",
+              action: () => navigation.navigate("FormInput", { formId: 72 }) // Correct route for navigation
+            },
+            {
+              name: "Individual Treatment Record",
+              icon: "accessibility-outline",
+              action: () => navigation.navigate("FormInput", { formId: 82 }) // Correct route for navigation
+            },
+            {
               name: "Consultation LogBook",
               icon: "newspaper-outline",
               action: () => navigation.navigate("Consult") // Correct route for navigation
@@ -114,3 +124,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </View>
   );
 };
+export default  Sidebar;
+

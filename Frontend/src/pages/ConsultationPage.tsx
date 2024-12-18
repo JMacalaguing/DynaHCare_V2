@@ -19,7 +19,7 @@ const exportToCSV = (data: { name: string; date: string }[]) => {
 };
 
 export default function ConsultationPage() {
-  const [logbookEntries, setLogbookEntries] = useState<{ name: string; date: string }[]>([]);
+  const [logbookEntries, setLogbookEntries] = useState<{ name: string; date: string, type_of_consultation:string }[]>([]);
 
   useEffect(() => {
     const fetchLogbookData = async () => {
@@ -82,24 +82,26 @@ export default function ConsultationPage() {
               <TableRow>
                 <TableHead className="text-gray-700 font-bold h-16 text-xl">Patient Name</TableHead>
                 <TableHead className="text-gray-700 font-bold h-16 text-xl">Date</TableHead>
+                <TableHead className="text-gray-700 font-bold h-16 text-xl">Type Of Consultation</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {logbookEntries.length > 0 ? (
-                logbookEntries.map((entry, index) => (
-                  <TableRow key={index} className="hover:bg-gray-50 transition-all">
-                    <TableCell className="text-gray-900 h-14">{entry.name}</TableCell>
-                    <TableCell className="text-gray-900 h-14">{new Date(entry.date).toDateString()}</TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={2} className="text-center text-gray-500">
-                    No logbook entries available
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
+  {logbookEntries.length > 0 ? (
+    logbookEntries.map((entry, index) => (
+      <TableRow key={index} className="hover:bg-gray-50 transition-all">
+        <TableCell className="text-gray-900 h-14">{entry.name}</TableCell>
+        <TableCell className="text-gray-900 h-14">{new Date(entry.date).toDateString()}</TableCell>
+        <TableCell className="text-gray-900 h-14">{entry.type_of_consultation}</TableCell>
+      </TableRow>
+    ))
+  ) : (
+    <TableRow>
+      <TableCell colSpan={3} className="text-center text-gray-500">
+        No logbook entries available
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
           </Table>
         </div>
       </main>
