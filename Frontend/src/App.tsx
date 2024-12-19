@@ -30,7 +30,7 @@ function App() {
           path="/dashboardPage"
           element={
             <ProtectedRoute>
-              <DashboardExample />
+              <PatientPage/>
             </ProtectedRoute>
           }
         />

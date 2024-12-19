@@ -1,8 +1,10 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "../Components/ui/button";
 import { jsPDF } from "jspdf";
 import config from "./config";
+import * as XLSX from "xlsx";
+import { FaFilePdf, FaFileExcel } from "react-icons/fa";
 
 interface Form {
   id: number;
@@ -30,6 +32,7 @@ interface FormResponse {
 export default function PatientList() {
   const location = useLocation();
   const navigate = useNavigate();
+  const [isModalOpen, setModalOpen] = useState(false);
 
   const { form, responses }: { form: Form; responses: FormResponse[] } = location.state || {
     form: null,
@@ -91,122 +94,217 @@ export default function PatientList() {
   );
 
   const exportToPDF = () => {
-    const doc = new jsPDF("landscape");
     const margin = 10;
-    const pageWidth = doc.internal.pageSize.width - margin * 2;
-    const pageHeight = doc.internal.pageSize.height - margin * 2;
+    const rowHeight = 10;
   
-    const fieldsPerPage = 5; // Number of fields to display per table
-    const allFieldArray = filteredFields;
+    // Calculate dynamic width based on the number of fields
+    const minColumnWidth = 40; // Minimum width for each column
+    const customWidth = Math.max(
+      210, // Default A4 width in mm
+      filteredFields.length * minColumnWidth + margin * 2
+    );
+  
+    // Calculate dynamic height
+    const titleHeight = 20;
+    const headerHeight = rowHeight;
+    const rowsHeight = responses.length * rowHeight;
+    const totalHeight = Math.max(
+      297, // Default A4 height in mm
+      titleHeight + headerHeight + rowsHeight + margin * 2
+    );
+  
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "mm",
+      format: [customWidth, totalHeight],
+    });
+  
+    let x = margin;
+    let y = margin;
   
     // Title
     doc.setFontSize(12);
-    doc.text(`Responses for: ${form.title}`, margin, margin);
+    doc.text(`Responses for: ${form.title}`, x, y);
+    y += 10;
   
-    let currentPage = 0;
+    // Render headers
+    doc.setFontSize(10);
+    filteredFields.forEach((header) => {
+      const columnWidth = (customWidth - margin * 2) / filteredFields.length;
+      doc.rect(x, y, columnWidth, rowHeight);
+      const lines = doc.splitTextToSize(header, columnWidth - 2);
+      doc.text(lines, x + 1, y + 6);
+      x += columnWidth;
+    });
   
-    // Function to render a table for a specific set of fields
-    const renderTable = (startIndex: number, endIndex: number, pageNumber: number) => {
-      const headers = allFieldArray.slice(startIndex, endIndex);
-      const columnWidths = headers.map(() => 50); // Set a fixed column width for simplicity
+    y += rowHeight;
   
-      let x = margin;
-      let y = margin + 10;
+    // Render rows
+    responses.forEach((response) => {
+      x = margin;
+      filteredFields.forEach((field) => {
+        const columnWidth = (customWidth - margin * 2) / filteredFields.length;
+        let value = "";
   
-      // Page header
-      if (pageNumber > 0) {
-        doc.addPage();
-        doc.text(`Responses for: ${form.title} - Page ${pageNumber + 1}`, margin, margin);
-        y = margin + 10;
-      }
-  
-      // Render headers
-      doc.setFontSize(10);
-      headers.forEach((header, index) => {
-        doc.rect(x, y, columnWidths[index], 10);
-        const lines = doc.splitTextToSize(header, columnWidths[index] - 2);
-        doc.text(lines, x + 1, y + 6);
-        x += columnWidths[index];
-      });
-  
-      // Render rows
-      y += 10;
-  
-      responses.forEach((response) => {
-        x = margin;
-        const rowHeight = 10;
-  
-        headers.forEach((field, index) => {
-          let value = "";
-          if (field === "Response ID") {
-            value = response.id.toString();
-          } else if (field === "Date Submitted") {
-            // Format the date to 'YYYY-MM-DD'
-            value = new Date(response.date).toISOString().split('T')[0];
-          } else if (field === "Submitted By") {
-            value = response.sender || "N/A";
-          } else {
-            // Remove empty/undefined values from response_data
-            value = Object.values(response.response_data)
-              .map((fields) => (fields[field] ? fields[field] : ""))
-              .filter((v) => v !== "") // Filter out empty strings
-              .join(", ") || "N/A";
-          }
-  
-          doc.rect(x, y, columnWidths[index], rowHeight);
-          const lines = doc.splitTextToSize(value, columnWidths[index] - 2);
-          doc.text(lines, x + 1, y + 6);
-          x += columnWidths[index];
-        });
-  
-        y += rowHeight;
-  
-        // Check if we need a new page
-        if (y + rowHeight > pageHeight) {
-          doc.addPage();
-          y = margin + 10;
-          x = margin;
-  
-          // Re-render the table headers on the new page
-          headers.forEach((header, index) => {
-            doc.rect(x, y, columnWidths[index], 10);
-            const lines = doc.splitTextToSize(header, columnWidths[index] - 2);
-            doc.text(lines, x + 1, y + 6);
-            x += columnWidths[index];
-          });
-          y += 10;
+        if (field === "Response ID") {
+          value = response.id.toString();
+        } else if (field === "Date Submitted") {
+          value = new Date(response.date).toISOString().split("T")[0];
+        } else if (field === "Submitted By") {
+          value = response.sender || "N/A";
+        } else {
+          value = Object.values(response.response_data)
+            .map((fields) => (fields[field] ? fields[field] : ""))
+            .filter((v) => v !== "")
+            .join(", ") || "N/A";
         }
+  
+        doc.rect(x, y, columnWidth, rowHeight);
+        const lines = doc.splitTextToSize(value, columnWidth - 2);
+        doc.text(lines, x + 1, y + 6);
+        x += columnWidth;
       });
-    };
+      y += rowHeight;
+    });
   
-    // Render tables in chunks of fields
-    for (let i = 0; i < allFieldArray.length; i += fieldsPerPage) {
-      renderTable(i, i + fieldsPerPage, currentPage);
-      currentPage++;
-    }
-  
+    // Save the PDF
     doc.save(`${form.title}_responses.pdf`);
   };
 
+  const exportToExcel = () => {
+    const rows = responses.map((response) => {
+      const row: Record<string, any> = {
+        "Response ID": response.id,
+        "Date Submitted": new Date(response.date).toISOString().split("T")[0],
+        "Submitted By": response.sender || "N/A",
+      };
+      Object.entries(response.response_data).forEach(([section, fields]) => {
+        Object.assign(row, fields);
+      });
+      return row;
+    });
+  
+    const worksheet = XLSX.utils.json_to_sheet(rows);
+  
+    // Ensure worksheet['!ref'] is defined before using it
+    const headerRange = worksheet['!ref'];
+  
+    if (headerRange) {
+      const range = XLSX.utils.decode_range(headerRange);
+  
+      // Loop through header cells and apply styles
+      for (let col = range.s.c; col <= range.e.c; col++) {
+        const headerCell = worksheet[XLSX.utils.encode_cell({ r: 0, c: col })];
+        if (headerCell) {
+          headerCell.s = {
+            font: { bold: true, color: { rgb: "FFFFFF" }, sz: 14 }, // Set bold, white color, and size 14
+            fill: { fgColor: { rgb: "4CAF50" } }, // Green background for header
+            alignment: { horizontal: "center", vertical: "center" },
+          };
+        }
+      }
+  
+      // Set styles for data cells (rows)
+      for (let rowIndex = range.s.r + 1; rowIndex <= range.e.r; rowIndex++) {
+        for (let colIndex = range.s.c; colIndex <= range.e.c; colIndex++) {
+          const cell = worksheet[XLSX.utils.encode_cell({ r: rowIndex, c: colIndex })];
+          if (cell) {
+            cell.s = {
+              font: { sz: 12 }, // Font size for data cells
+              fill: { fgColor: { rgb: "F0F0F0" } }, // Light gray background for data cells
+              alignment: { horizontal: "center", vertical: "center" },
+            };
+          }
+        }
+      }
+    }
+  
+    // Apply column width dynamically based on content length
+    const columnWidths = filteredFields.map((field) => {
+      const maxLength = Math.max(
+        ...rows.map((row) => (row[field] ? row[field].toString().length : 0)),
+        field.length
+      );
+      return { wch: maxLength + 2 }; // Add padding to the width
+    });
+    worksheet['!cols'] = columnWidths;
+  
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Responses");
+  
+    // Write the Excel file
+    XLSX.writeFile(workbook, `${form.title}_responses.xlsx`);
+  };
+  
+  
   return (
     <div className="min-h-screen bg-gray-100 p-4 w-full">
-      <header className="border-b border-gray-200 mb-6 flex justify-between items-center">
+          <header className="border-b border-gray-200 mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-blue-900">Responses for: {form.title}</h1>
         <div>
           <Button
-            onClick={exportToPDF}
-            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            onClick={() => setModalOpen(true)}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 mb-2"
           >
-            Export to PDF
+            Export
           </Button>
           <Button
             onClick={clearResponses}
-            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 ml-4"
+            className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 ml-4 mb-2"
           >
             Clear Responses
           </Button>
         </div>
       </header>
+              {/* Modal */}
+              {isModalOpen && (
+                <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
+                  <div className="bg-white rounded-lg p-4 w-96 relative">
+                    {/* Close Button */}
+                    <button
+                      onClick={() => setModalOpen(false)}
+                      className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+                      aria-label="Close"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+
+                    {/* Modal Content */}
+                    <h2 className="text-xl font-bold mb-4 text-black">Export Options</h2>
+                    <div className="flex justify-between items-center">
+                      <Button
+                        onClick={() => {
+                          exportToPDF();
+                          setModalOpen(false);
+                        }}
+                        className="flex items-center bg-blue-600 text-white px-3 py-2 rounded-md hover:bg-blue-700 ml-5"
+                      >
+                        <FaFilePdf className="mr-1" />
+                        Export to PDF
+                      </Button>
+                      <Button
+                        onClick={() => {
+                          exportToExcel();
+                          setModalOpen(false);
+                        }}
+                        className="flex items-center bg-green-600 text-white px-3 py-2 rounded-md hover:bg-green-700 mr-5"
+                      >
+                        <FaFileExcel className="mr-1" />
+                        Export to Excel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
 
       {/* Scrollable Table */}
       <div className="overflow-auto max-h-[500px] max-w-[1430px] bg-white shadow-md rounded-lg">
