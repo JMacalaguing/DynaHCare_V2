@@ -17,6 +17,7 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // New state
   const [showPendingModal, setShowPendingModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showRejectedModal, setShowRejectedModal] = useState(false);
@@ -25,8 +26,13 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
   const statusUrl = `${config.BASE_URL}/api/auth/approve/`;
 
   const handleSignUp = async () => {
-    if (!fullName || !phoneNumber || !email || !password) {
+    if (!fullName || !phoneNumber || !email || !password || !confirmPassword) {
       Alert.alert("Error", "Please fill in all fields.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
       return;
     }
 
@@ -97,6 +103,7 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
         </Text>
 
         <View className="w-full space-y-4">
+          {/* Full Name Input */}
           <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-md mb-3">
             <Ionicons name="person-outline" size={20} color="#003366" />
             <TextInput
@@ -108,6 +115,7 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
             />
           </View>
 
+          {/* Phone Number Input */}
           <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-md mb-3">
             <Ionicons name="call-outline" size={20} color="#003366" />
             <TextInput
@@ -120,6 +128,7 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
             />
           </View>
 
+          {/* Email Input */}
           <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-md mb-3">
             <Ionicons name="mail-outline" size={20} color="#003366" />
             <TextInput
@@ -132,7 +141,8 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
             />
           </View>
 
-          <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-md">
+          {/* Password Input */}
+          <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-md mb-3">
             <Ionicons name="lock-closed-outline" size={20} color="#003366" />
             <TextInput
               placeholder="Password"
@@ -140,6 +150,19 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
               secureTextEntry={true}
               value={password}
               onChangeText={setPassword}
+              className="flex-1 ml-2 text-gray-800 text-base"
+            />
+          </View>
+
+          {/* Confirm Password Input */}
+          <View className="flex-row items-center bg-white rounded-full px-4 py-2 shadow-md">
+            <Ionicons name="lock-closed-outline" size={20} color="#003366" />
+            <TextInput
+              placeholder="Confirm Password"
+              placeholderTextColor="#003366"
+              secureTextEntry={true}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
               className="flex-1 ml-2 text-gray-800 text-base"
             />
           </View>
@@ -155,8 +178,8 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
         </TouchableOpacity>
       </View>
 
-      {/* Pending Approval Modal */}
-      <Modal transparent visible={showPendingModal} animationType="fade">
+            {/* Pending Approval Modal */}
+            <Modal transparent visible={showPendingModal} animationType="fade">
         <View className="flex-1 justify-center items-center bg-black/50">
           <View className="w-80 bg-white rounded-lg p-6 items-center">
             <Text className="text-lg font-bold text-center mb-4">
@@ -205,8 +228,11 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
           </View>
         </View>
       </Modal>
+      
     </LinearGradient>
+    
   );
 }
+
 
 export default  SignUpScreen;

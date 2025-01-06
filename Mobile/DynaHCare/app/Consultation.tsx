@@ -46,7 +46,7 @@ export function Consultation({ navigation }: { navigation: any }) {
     const handleSubmitToServer = async () => {
       setIsSaveLocalModalOpen(false)
       const apiUrl = `${config.BASE_URL}/api/logbook/`;
-      const payload = { name, date: date?.toISOString().split('T')[0] };
+      const payload = { name, date: date?.toISOString().split('T')[0],type_of_consultation: typeOfConsultation};
   
       try {
         const response = await fetch(apiUrl, {
