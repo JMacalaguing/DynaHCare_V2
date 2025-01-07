@@ -33,7 +33,7 @@ interface FormResponse {
 
 const vaccines = [
   "BCG",
-  "Hepa B w/n 24hrs",
+  "Hepatitis B",
   "Pentavalent Vaccine (DPT-Hepa B-HIB)",
   "Oral Polio Vaccine (OPV)",
   "Pneumococcal Conjugate Vaccine (PCV)",
@@ -45,13 +45,6 @@ const months = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December",
 ];
-
-const generateRandomData = () => {
-  return vaccines.reduce((acc, vaccine) => {
-    acc[vaccine] = months.map(() => Math.floor(Math.random() * 100)); // Example random data
-    return acc;
-  }, {} as Record<string, number[]>);
-};
 
 const Modal = ({ isOpen, onClose, message }: { isOpen: boolean; onClose: () => void; message: string }) => {
   if (!isOpen) return null;
@@ -97,7 +90,13 @@ export default function Home() {
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [vaccineData, setVaccineData] = useState(generateRandomData());
+  const [vaccineData, setVaccineData] = useState(() =>
+    vaccines.reduce((acc, vaccine) => {
+      acc[vaccine] = months.map(() => 0); 
+      return acc;
+    }, {} as Record<string, number[]>)
+  );
+
   const navigate = useNavigate();
 
   const FORMS_API = `${config.BASE_URL}/formbuilder/api/forms/`;
@@ -146,6 +145,66 @@ export default function Home() {
     }
   };
 
+  const vaccineMapping: Record<string, string> = {
+    BCG:"BCG",
+    Hepa: "Hepatitis B",
+    Penta: "Pentavalent Vaccine (DPT-Hepa B-HIB)",
+    OPV: "Oral Polio Vaccine (OPV)",
+    PCV: "Pneumococcal Conjugate Vaccine (PCV)",
+    IPV: "Inactivated Polio Vaccine (IPV)",
+    MMR: "Measles, Mumps, Rubella (MMR)",
+  };
+  
+  const fetchVaccineData = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(RESPONSES_API);
+      const data: FormResponse[] = await response.json();
+      const filteredResponses = data.filter((response) => response.form === 84);
+  
+      if (filteredResponses.length === 0) {
+        setIsModalOpen(true);
+      } else {
+        const transformedData = vaccines.reduce((acc, vaccine) => {
+          acc[vaccine] = months.map(() => 0);
+          return acc;
+        }, {} as Record<string, number[]>);
+  
+        filteredResponses.forEach((response) => {
+          const immunizationData = response.response_data.Immunization;
+          if (immunizationData) {
+            const vaccineName = immunizationData["Name of Vaccine"];
+            const date = immunizationData.Date;
+  
+            if (vaccineName && date) {
+              const monthIndex = new Date(date).getMonth();
+  
+              // Match keyword to full vaccine description
+              const mappedVaccine = Object.keys(vaccineMapping).find((key) =>
+                vaccineName.includes(key)
+              );
+  
+              if (mappedVaccine && transformedData[vaccineMapping[mappedVaccine]]) {
+                transformedData[vaccineMapping[mappedVaccine]][monthIndex] += 1;
+              }
+            }
+          }
+        });
+  
+        console.log("Transformed Data:", transformedData);
+        setVaccineData(transformedData);
+      }
+    } catch (error) {
+      console.error("Error fetching response data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchVaccineData();
+  }, []);
+
   const currentDate = new Date().toLocaleDateString();
   const calculateAnnualTotal = (data: number[]) =>
     data.reduce((total, count) => total + count, 0);
@@ -177,22 +236,22 @@ export default function Home() {
           <h6 className="text-sm text-center text-gray-500 mb-4">Area: Barangay Lumbia, Cagayan De Oro City 9000</h6>
           {/* Quarterly Totals Display */}
           <div className="grid gap-6 md:grid-cols-4 mb-4 text-center">
-                    <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
-                      1st Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.firstQuarter}</h2>
-                    </div>
-                    <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
-                      2nd Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.secondQuarter}</h2>
-                    </div>
-                    <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
-                      3rd Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.thirdQuarter}</h2>
-                    </div>
-                    <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
-                      4th Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.fourthQuarter}</h2>
-                    </div>
-                  </div>
+            <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
+              1st Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.firstQuarter}</h2>
+            </div>
+            <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
+              2nd Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.secondQuarter}</h2>
+            </div>
+            <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
+              3rd Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.thirdQuarter}</h2>
+            </div>
+            <div className="bg-gradient-to-t from-sky-400 to-emerald-300 h-20 p-2 text-lg font-semibold drop-shadow-lg rounded">
+              4th Quarter<br /><h2 className="text-blue-900 text-2xl font-bold ">{quarterlyTotals.fourthQuarter}</h2>
+            </div>
+          </div>
           <div className="overflow-auto shadow-lg rounded-lg">
             <table className="min-w-full border-collapse bg-white text-sm">
-            <thead>
+              <thead>
                 <tr className=" bg-gradient-to-t from-sky-400 to-emerald-300 text-white">
                   <th className="border border-gray-200 px-4 py-2 text-left font-medium  bg-gradient-to-t from-sky-400 to-emerald-300" rowSpan={2}>
                     Name of Vaccine
@@ -241,18 +300,20 @@ export default function Home() {
               </tbody>
             </table>
           </div>
-                <div className="mt-8 text-center flex items-center justify-center">
-                    <div className="rounded-full h-96 w-96 p-5 bg-gradient-to-t from-sky-400 to-emerald-300 flex items-center justify-center flex-col drop-shadow-lg">
-                      <p className="text-xl font-semibold text-blue-900 text-center">
-                        Total Number of Annual Summary Cumulative:
-                      </p>
-                      <h2 className="text-7xl font-bold text-blue-900">
-                        {totalAnnualSummary} 
-                      </h2>
-                    </div>
-                  </div>
-      </div>
-       <div className="border-t-8 mb-8"></div>
+          <div className="mt-8 text-center flex items-center justify-center">
+            <div className="rounded-full h-96 w-96 p-5 bg-gradient-to-t from-sky-400 to-emerald-300 flex items-center justify-center flex-col drop-shadow-lg">
+              <p className="text-xl font-semibold text-blue-900 text-center">
+                Total Number of Annual Summary Cumulative:
+              </p>
+              <h2 className="text-7xl font-bold text-blue-900">
+                {totalAnnualSummary} 
+              </h2>
+            </div>
+          </div>
+        </div>
+        <div className="border-t-8 mb-8"></div>
+        
+        <div className="border-t-8 mb-8"></div>
         {loading && <p>Loading...</p>}
         {!loading && (
           <div className="grid gap-6 md:grid-cols-3">

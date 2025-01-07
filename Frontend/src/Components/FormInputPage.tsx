@@ -253,7 +253,18 @@ const FormInputPage = () => {
                       handleInputChange(section.sectionname, field.label.trim(), e.target.value)
                     }
                   />
-                ) : field.type === "checkbox-group" ? (
+                ) : field.type === "date" ? (
+                  <input
+                    type="date"
+                    id={fieldId}
+                    required={field.required}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                    value={formValues[section.sectionname]?.[field.label.trim()] || ""}
+                    onChange={(e) =>
+                      handleInputChange(section.sectionname, field.label.trim(), e.target.value)
+                    }
+                  />
+                ): field.type === "checkbox-group" ? (
                   <div className="space-y-2 text-gray-800">
                     {Array.isArray(field.options)
                       ? field.options.map((option: string, index: number) => (

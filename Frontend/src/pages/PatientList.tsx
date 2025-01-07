@@ -88,7 +88,7 @@ export default function PatientList() {
   });
 
   // Include specific fields along with dynamic fields
-  const includedFields = ["Response ID", "Date Submitted", "Submitted By"];
+  const includedFields = ["Date Submitted", "Submitted By"];
   const filteredFields = [...includedFields, ...allFields].filter(
     (field, index, self) => self.indexOf(field) === index // Ensure uniqueness
   );

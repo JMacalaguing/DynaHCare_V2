@@ -136,17 +136,6 @@ const Createform = () => {
                     >
                       <Edit3 className="h-5 w-5" />
                     </Button>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      className="p-2 text-red-500 hover:text-red-600"
-                      onClick={(e) => {
-                        e.stopPropagation(); // Prevent parent click
-                        deleteForm(form.id);
-                      }}
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </Button>
                     <div onClick={(e) => {e.stopPropagation();}}>
                     <select
                           value={form.status}
