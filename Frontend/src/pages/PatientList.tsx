@@ -25,7 +25,7 @@ interface FormResponse {
   id: number;
   form: number;
   response_data: Record<string, Record<string, any>>;
-  date: string;
+  date_submitted: string;
   sender: string;
 }
 
@@ -149,7 +149,7 @@ export default function PatientList() {
         if (field === "Response ID") {
           value = response.id.toString();
         } else if (field === "Date Submitted") {
-          value = new Date(response.date).toISOString().split("T")[0];
+          value = new Date(response.date_submitted).toISOString().split("T")[0];
         } else if (field === "Submitted By") {
           value = response.sender || "N/A";
         } else {
@@ -175,7 +175,7 @@ export default function PatientList() {
     const rows = responses.map((response) => {
       const row: Record<string, any> = {
         "Response ID": response.id,
-        "Date Submitted": new Date(response.date).toISOString().split("T")[0],
+        "Date Submitted": new Date(response.date_submitted).toISOString().split("T")[0],
         "Submitted By": response.sender || "N/A",
       };
       Object.entries(response.response_data).forEach(([section, fields]) => {
@@ -319,32 +319,60 @@ export default function PatientList() {
             </tr>
           </thead>
           <tbody>
-            {responses.map((response) => (
-              <tr key={response.id} className="hover:bg-gray-100 text-black">
-                {filteredFields.map((field) => {
-                  let value = "";
-                  if (field === "Response ID") {
-                    value = response.id.toString();
-                  } else if (field === "Date Submitted") {
-                    value = response.date ? new Date(response.date).toISOString().split("T")[0] : " ";
-                  } else if (field === "Submitted By") {
-                    value = response.sender;
-                  } else {
-                    value =
-                      Object.values(response.response_data)
+              {responses.map((response) => (
+                <tr key={response.id} className="hover:bg-gray-100 text-black">
+                  {filteredFields.map((field) => {
+                    let value = "";
+
+                    if (field === "Response ID") {
+                      value = response.id.toString();
+                    } else if (field === "Date Submitted") {
+                      value = response.date_submitted ? new Date(response.date_submitted).toISOString().split("T")[0] : " ";
+                    } else if (field === "Submitted By") {
+                      value = response.sender || "N/A";
+                    } else {
+                      // Access the response_data object
+                      const fieldValue = Object.values(response.response_data)
                         .map((fields) => fields[field])
-                        .filter((v) => v !== undefined && v !== "")
-                        .join(", ") || "    ";
-                  }
-                  return (
-                    <td key={field} className="border px-2 py-1 text-xs text-left">
-                      {value}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
+                        .filter((v) => v !== undefined && v !== "");
+
+                      if (fieldValue.length > 0) {
+                        const valueItem = fieldValue[0];
+
+                        // Handling Vaccine field (if it is an array of objects)
+                        if (Array.isArray(valueItem)) {
+                          value = valueItem
+                            .map((vaccine: { name: string; date: string }) => `${vaccine.name} (${vaccine.date})`)
+                            .join(", ");
+                        } else if (typeof valueItem === "object" && valueItem !== null) {
+                          // Handling Immunization fields (Name, Age, Sex)
+                          if (valueItem.Name) {
+                            value += `${valueItem.Name} `;
+                          }
+                          if (valueItem.Age) {
+                            value += `(${valueItem.Age}) `;
+                          }
+                          if (valueItem.Sex) {
+                            value += `Sex: ${valueItem.Sex}`;
+                          }
+                        } else {
+                          // For other fields, use the direct value
+                          value = valueItem || "N/A";
+                        }
+                      } else {
+                        value = "N/A"; // Fallback if no value found
+                      }
+                    }
+
+                    return (
+                      <td key={field} className="border px-2 py-1 text-xs text-left">
+                        {value}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
         </table>
       </div>
     </div>

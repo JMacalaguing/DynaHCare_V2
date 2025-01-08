@@ -121,10 +121,10 @@ export function HomeScreen({ navigation }: { navigation: any }) {
           
               {/* "View" Button */}
               <TouchableOpacity
-                className="bg-blue-800 rounded-full px-4 py-2 ml-2"
+                className="ml-2"
                 onPress={() => navigation.navigate("FormDetails", { formId: item.id })} // Pass formId
               >
-                <Text className="text-white font-bold">Details</Text>
+                 <Ionicons name="ellipsis-vertical" size={28} color="#1e40af" />
               </TouchableOpacity>
             </View>
           )}

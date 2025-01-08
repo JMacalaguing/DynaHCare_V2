@@ -158,16 +158,91 @@ class SubmitFormResponse(APIView):
                     status=status.HTTP_400_BAD_REQUEST,
                 )
 
-            # Create and save the response, with sender as a string
-            form_response = FormResponse(form=form, response_data=response_data, sender=sender_name)
-            form_response.save()
+            if form_id == 84:  # Special logic for Immunization form
+                immunization_data = response_data.get("Immunization")
+                if not immunization_data:
+                    return DRFResponse(
+                        {"message": "Immunization data is required"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
 
-            # Serialize and respond
-            serializer = FormResponseSerializer(form_response)
-            return DRFResponse(
-                {"message": "Form submitted successfully", "data": serializer.data},
-                status=status.HTTP_201_CREATED,
-            )
+                name = immunization_data.get("Name")
+                age = immunization_data.get("Age")
+                sex = immunization_data.get("Sex")
+                new_vaccine = immunization_data.get("Vaccine")
+                new_vaccine_date = immunization_data.get("Date")
+
+                if not (name and age and sex and new_vaccine and new_vaccine_date):
+                    return DRFResponse(
+                        {"message": "Name, Age, Sex, Vaccine, and Date fields are required"},
+                        status=status.HTTP_400_BAD_REQUEST,
+                    )
+
+                # Check for an existing response with matching Name, Age, and Sex
+                existing_response = FormResponse.objects.filter(
+                    form=form,
+                    response_data__Immunization__Name=name,
+                    response_data__Immunization__Age=age,
+                    response_data__Immunization__Sex=sex,
+                ).first()
+
+                if existing_response:
+                    # Extract the existing vaccines
+                    current_vaccines = existing_response.response_data["Immunization"].get("Vaccine", [])
+                    
+                    # Ensure current_vaccines is a list of dicts
+                    if not isinstance(current_vaccines, list):
+                        current_vaccines = []
+
+                    # Check if the new vaccine already exists
+                    vaccine_exists = False
+                    for vaccine_entry in current_vaccines:
+                        if vaccine_entry.get("name") == new_vaccine:
+                            vaccine_exists = True
+                            vaccine_entry["date"] = new_vaccine_date  # Update the date if vaccine exists
+
+                    if not vaccine_exists:
+                        # Add the new vaccine with its date
+                        current_vaccines.append({"name": new_vaccine, "date": new_vaccine_date})
+
+                    # Update the existing response with the new vaccine list
+                    immunization_data.pop("Date", None)  # Remove top-level Date field
+                    existing_response.response_data["Immunization"]["Vaccine"] = current_vaccines
+                    existing_response.save()
+
+                    serializer = FormResponseSerializer(existing_response)
+                    return DRFResponse(
+                        {"message": "Form response updated successfully", "data": serializer.data},
+                        status=status.HTTP_200_OK,
+                    )
+                else:
+                    # Create a new response if no match is found
+                    new_vaccine = immunization_data.get("Vaccine")
+                    new_vaccine_date = immunization_data.get("Date")
+
+                    # Ensure Vaccine is always a list of objects
+                    response_data["Immunization"]["Vaccine"] = [{"name": new_vaccine, "date": new_vaccine_date}]
+                    response_data["Immunization"].pop("Date", None)
+
+                    form_response = FormResponse(form=form, response_data=response_data, sender=sender_name)
+                    form_response.save()
+
+                    serializer = FormResponseSerializer(form_response)
+                    return DRFResponse(
+                        {"message": "Form submitted successfully", "data": serializer.data},
+                        status=status.HTTP_201_CREATED,
+                    )
+            else:
+                # Default behavior for other forms
+                form_response = FormResponse(form=form, response_data=response_data, sender=sender_name)
+                form_response.save()
+
+                serializer = FormResponseSerializer(form_response)
+                return DRFResponse(
+                    {"message": "Form submitted successfully", "data": serializer.data},
+                    status=status.HTTP_201_CREATED,
+                )
+
         except Form.DoesNotExist:
             return DRFResponse(
                 {"message": "Form not found"},

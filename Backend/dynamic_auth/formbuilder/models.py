@@ -52,7 +52,7 @@ class FormResponseData(models.Model):
 class FormResponse(models.Model):
     form = models.ForeignKey(Form, related_name='form_responses', on_delete=models.CASCADE)
     response_data = models.JSONField()  # Store the user responses in JSON format
-    date = models.DateTimeField(auto_now_add=True)
+    date_submitted = models.DateTimeField(auto_now_add=True)
     sender = models.CharField(max_length=255)
     status = models.CharField(max_length=50, default="pending")  # Optional: Track response status
 

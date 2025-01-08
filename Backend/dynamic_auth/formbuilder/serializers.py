@@ -21,12 +21,12 @@ class FormResponseSerializer(serializers.ModelSerializer):
     Serializes the form and the user-submitted response data.
     """
     response_data = serializers.JSONField()  # Serializes response_data as JSON
-    date = serializers.DateTimeField(read_only=True)  # Ensure this is read-only
+    date_submitted = serializers.DateTimeField(read_only=True)  # Ensure this is read-only
     sender = serializers.StringRelatedField()  # Use StringRelatedField for sender representation
 
     class Meta:
         model = FormResponse
-        fields = ['id', 'form', 'response_data', 'date', 'sender']
+        fields = ['id', 'form', 'response_data', 'date_submitted', 'sender']
 
 class TemplateSerializer(serializers.ModelSerializer):
     class Meta:
