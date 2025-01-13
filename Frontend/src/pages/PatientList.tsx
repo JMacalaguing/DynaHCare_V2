@@ -33,6 +33,7 @@ export default function PatientList() {
   const location = useLocation();
   const navigate = useNavigate();
   const [isModalOpen, setModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState<string>("");
 
   const { form, responses }: { form: Form; responses: FormResponse[] } = location.state || {
     form: null,
@@ -236,9 +237,36 @@ export default function PatientList() {
     XLSX.writeFile(workbook, `${form.title}_responses.xlsx`);
   };
   
+  const filteredResponses = responses.filter((response) => {
+    // Collect all possible searchable values in this response
+    const searchableValues = [
+      response.id.toString(),
+      new Date(response.date_submitted).toISOString().split("T")[0],
+      response.sender || "",
+      ...Object.values(response.response_data).flatMap((fields) =>
+        Object.entries(fields).flatMap(([key, value]) => {
+          // Handle nested objects or arrays
+          if (Array.isArray(value)) {
+            return value.map((item) =>
+              typeof item === "object"
+                ? Object.values(item).join(" ").toLowerCase()
+                : item.toString().toLowerCase()
+            );
+          } else if (typeof value === "object" && value !== null) {
+            return Object.values(value).join(" ").toLowerCase();
+          } else {
+            return value.toString().toLowerCase();
+          }
+        })
+      ),
+    ];
+  
+    // Check if any value matches the search term
+    return searchableValues.some((value) => value.includes(searchTerm.toLowerCase()));
+  });
   
   return (
-    <div className="min-h-screen bg-gray-100 p-4 w-full">
+    <div className="min-h-screen bg-gradient-to-t from-sky-300 to-blue-50 p-4 w-full">
           <header className="border-b border-gray-200 mb-6 flex justify-between items-center">
         <h1 className="text-2xl font-semibold text-blue-900">Responses for: {form.title}</h1>
         <div>
@@ -256,6 +284,30 @@ export default function PatientList() {
           </Button>
         </div>
       </header>
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <input
+            type="text"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full px-4 py-3 text-gray-700 bg-white border border-sky-300 rounded-full shadow-lg focus:outline-none focus:ring-1 focus:ring-sky-500 "
+          />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2}
+            stroke="currentColor"
+            className="absolute top-1/2 right-4 h-5 w-5 text-gray-500 transform -translate-y-1/2"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M11 17a6 6 0 100-12 6 6 0 000 12zM21 21l-4.35-4.35"
+            />
+          </svg>
+        </div>
               {/* Modal */}
               {isModalOpen && (
                 <div className="fixed inset-0 bg-gray-900 bg-opacity-50 flex items-center justify-center">
@@ -319,7 +371,7 @@ export default function PatientList() {
             </tr>
           </thead>
           <tbody>
-              {responses.map((response) => (
+              {filteredResponses.map((response) => (
                 <tr key={response.id} className="hover:bg-gray-100 text-black">
                   {filteredFields.map((field) => {
                     let value = "";

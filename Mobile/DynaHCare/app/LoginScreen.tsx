@@ -30,8 +30,7 @@ export function LoginScreen({ navigation }: { navigation: any }) {
     const checkAuthentication = async () => {
       const token = await AsyncStorage.getItem("userToken");
       if (token) {
-        // If token exists, navigate to Home
-        navigation.navigate("Home");
+        setModalVisible(true)
       }
     };
 
@@ -60,10 +59,6 @@ export function LoginScreen({ navigation }: { navigation: any }) {
       setModalMessage("Login Successful! Redirecting...");
       setModalVisible(true);
 
-      setTimeout(() => {
-        setModalVisible(false);
-        navigation.navigate("Home");
-      }, 1500);
     } catch (error) {
       setLoading(false);
 
@@ -141,29 +136,39 @@ export function LoginScreen({ navigation }: { navigation: any }) {
             {loading ? "Logging in..." : "Log in"}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          className="mt-4"
+          onPress={() => navigation.navigate("ForgotPassword")}
+        >
+          <Text className="text-center text-blue-600 font-bold">Forgot Password?</Text>
+        </TouchableOpacity>
       </View>
 
       {/* Popup Modal */}
       <Modal
-        transparent={true}
-        animationType="slide"
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}
-      >
-        <View className="flex-1 justify-center items-center bg-black/50">
-          <View className="bg-white rounded-lg p-5 shadow-md w-4/5">
-            <Text className="text-lg font-bold text-gray-800 text-center">
-              {modalMessage}
-            </Text>
-            <TouchableOpacity
-              className="mt-5 bg-blue-400 py-2 px-4 rounded-full self-center"
-              onPress={() => setModalVisible(false)}
-            >
-              <Text className="text-white font-bold">OK</Text>
-            </TouchableOpacity>
+          transparent={true}
+          animationType="slide"
+          visible={modalVisible}
+        >
+          <View className="flex-1 justify-center items-center bg-black/50">
+            <View className="bg-white rounded-lg p-5 shadow-md w-4/5">
+              <Text className="text-lg font-bold text-gray-800 text-center">
+                {modalMessage}
+              </Text>
+              <TouchableOpacity
+                className="mt-5 bg-blue-400 py-2 px-4 rounded-full self-center"
+                onPress={() => {
+                  setModalVisible(false);
+                  if (modalMessage === "Login Successful! Click OK to proceed.") {
+                    navigation.navigate("Home"); // Navigate after success
+                  }
+                }}
+              >
+                <Text className="text-white font-bold">OK</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
     </LinearGradient>
   );
 }

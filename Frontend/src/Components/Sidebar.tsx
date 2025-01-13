@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LogOutIcon, Menu, ClipboardList, LayoutDashboardIcon, NotebookPen, Users } from "lucide-react";
+import { LogOutIcon, Menu, ClipboardList, LayoutDashboardIcon, NotebookPen, Users, FileUser } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 
 const SIDEBAR_ITEMS = [
-    { name: "Dashboard", icon: LayoutDashboardIcon, color: "#040E46", href: "/patientPage" },
+    { name: "Dashboard", icon: LayoutDashboardIcon, color: "#040E46", href: "/dashboardPage" },
+    { name: "Individual Treatment Record", icon: FileUser, color: "#040E46", href: "/ITRpage" },
     { name: "Consultation Logbook", icon: ClipboardList, color: "#040E46", href: "/consultationPage" },
-    { name: "Create Form", icon: NotebookPen, color: "#040E46", href: "/createForm" },
+    { name: "ITR Forms", icon: NotebookPen, color: "#040E46", href: "/createForm" },
     { name: "User Management", icon: Users, color: "#040E46", href: "/UserPage" },
     { name: "Logout", icon: LogOutIcon, color: "#040E46", href: "#" }
 ];

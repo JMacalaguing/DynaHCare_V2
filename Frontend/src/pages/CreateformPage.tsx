@@ -1,6 +1,6 @@
 import { Button } from "../Components/ui/button"; // Adjust path as needed
 import { useNavigate } from "react-router-dom";
-import { Edit3, Plus, Trash2 } from "lucide-react";
+import { Edit3, Plus, NotebookPen, CalendarDays } from "lucide-react";
 import { useState, useEffect } from "react";
 import config from "./config";
 import TemplateModal from "./TemplateModal";
@@ -99,12 +99,20 @@ const Createform = () => {
     navigate("/editForm", { state: { formData: form } });
   };
 
+  const currentDate = new Date().toLocaleDateString();
+
   return (
     <div className="flex-col gap-5 w-full bg-gray-50 min-h-screen">
-      {/* Header */}
-      <header className="border-b border-[#E5E7EB] bg-white shadow-md">
-        <div className="container mx-auto flex items-center justify-between px-4 py-4">
-          <h1 className="text-2xl font-semibold text-[#040E46]">Forms</h1>
+      <header className="border-b border-gray-200 px-4 py-4">
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            <NotebookPen className="h-6 w-6 text-black" />
+            <span className="text-xl font-semibold text-black">Individual Treatment Record Forms</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <CalendarDays color="black" fill="white" />
+            <span className="font-medium text-black">{currentDate}</span>
+          </div>
         </div>
       </header>
 

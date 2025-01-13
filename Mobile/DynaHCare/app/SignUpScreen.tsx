@@ -223,7 +223,7 @@ export function SignUpScreen({ navigation }: { navigation: any }) {
               }}
               className="mt-2 bg-red-500 rounded-full py-2 px-6 shadow-md"
             >
-              <Text className="text-white font-bold">Go to Home</Text>
+              <Text className="text-white font-bold">Go to Back</Text>
             </TouchableOpacity>
           </View>
         </View>

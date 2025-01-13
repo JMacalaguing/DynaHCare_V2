@@ -1,6 +1,9 @@
 # accounts/models.py
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+import uuid
+from django.utils.timezone import now
+from datetime import timedelta
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, full_name, email, phone_number, password=None, **extra_fields):
@@ -38,3 +41,11 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+class PasswordResetCode(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    code = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def is_valid(self):
+        return now() < self.created_at + timedelta(minutes=15)

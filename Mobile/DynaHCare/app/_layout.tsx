@@ -1,5 +1,5 @@
 import React from "react";
-import { SafeAreaView, StatusBar } from "react-native";
+import { ActivityIndicator, SafeAreaView, StatusBar } from "react-native";
 import { createStackNavigator } from "@react-navigation/stack";
 import MainScreen from "./index";
 import "../global.css"; 
@@ -12,12 +12,21 @@ import { LocalStorage } from "./LocalStorage";
 import { Consultation } from "./Consultation";
 import { AuthProvider, useAuth } from "./AuthContext"; 
 import { LogStorage } from "./LogStorage";
-import { PatientEnrollment } from "./PatientEnrollment";
+import ForgotPassword from "./ForgotPassword";
+
 
 const Stack = createStackNavigator();
 
 function AppNavigator() {
-  const { isAuthenticated } = useAuth(); // Access authentication status
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <SafeAreaView style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#ffffff" }}>
@@ -26,7 +35,6 @@ function AppNavigator() {
         {isAuthenticated ? (
           <>
             <Stack.Screen name="Home" component={HomeScreen} />
-            <Stack.Screen name="Enrollment" component={PatientEnrollment} />
             <Stack.Screen name="FormDetails" component={FormDetailsScreen} />
             <Stack.Screen name="FormInput" component={FormInputScreen} />
             <Stack.Screen name="local" component={LocalStorage} />
@@ -38,12 +46,14 @@ function AppNavigator() {
             <Stack.Screen name="Main" component={MainScreen} />
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPassword} />
           </>
         )}
       </Stack.Navigator>
     </SafeAreaView>
   );
 }
+
 
 export default function App() {
   return (

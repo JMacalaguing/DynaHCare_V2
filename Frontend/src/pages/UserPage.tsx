@@ -61,7 +61,7 @@ const UserPage: React.FC = () => {
   };
 
  return (
-    <div className="p-5 bg-gray-100 min-h-screen w-full">
+    <div className="p-5 bg-gradient-to-t from-sky-300 to-blue-50 min-h-screen w-full">
         <h1 className="text-3xl font-bold mb-6 text-blue-900">User Management</h1>
         <div className="bg-white shadow-lg rounded-lg overflow-hidden">
             <table className="table-auto w-full text-left border border-gray-300">

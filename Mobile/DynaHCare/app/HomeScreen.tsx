@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   Alert,
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { Sidebar } from "./Sidebar";
@@ -25,26 +26,45 @@ export function HomeScreen({ navigation }: { navigation: any }) {
   const [activeTab, setActiveTab] = useState("Home");
   const [loading, setLoading] = useState(false);
 
-  // Fetch forms from the API
+  const FORMS_STORAGE_KEY = "forms_data";
+
+  // Fetch forms from the API and update local storage
+  const fetchForms = async () => {
+    setLoading(true); // Show loading indicator
+    try {
+      const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch forms");
+      }
+      const data = await response.json();
+      setForms(data); // Set forms in state
+
+      // Save to AsyncStorage
+      await AsyncStorage.setItem(FORMS_STORAGE_KEY, JSON.stringify(data));
+    } catch (error) {
+      console.log("Error fetching forms:", error);
+      Alert.alert("Offline Mode", "Failed to load forms.Using only offline data.");
+    } finally {
+      setLoading(false); // Hide loading indicator
+    }
+  };
+
+  // Load forms from local storage on component mount
   useEffect(() => {
-    const fetchForms = async () => {
-      setLoading(true); // Show loading indicator
+    const loadForms = async () => {
       try {
-        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/`);
-        if (!response.ok) {
-          throw new Error("Failed to fetch forms");
+        const storedForms = await AsyncStorage.getItem(FORMS_STORAGE_KEY);
+        if (storedForms) {
+          setForms(JSON.parse(storedForms)); // Use local data if available
         }
-        const data = await response.json();
-        setForms(data); // Assuming the API returns a list of forms
       } catch (error) {
-        console.error("Error fetching forms:", error);
-        Alert.alert("Error", "Failed to load forms. Please try again later.");
+        console.error("Error loading local forms:", error);
       } finally {
-        setLoading(false); // Hide loading indicator
+        fetchForms(); // Fetch new data from the server
       }
     };
 
-    fetchForms();
+    loadForms();
   }, []);
 
   // Filter forms based on the search query
@@ -118,13 +138,13 @@ export function HomeScreen({ navigation }: { navigation: any }) {
                   </Text>
                 </View>
               </TouchableOpacity>
-          
+
               {/* "View" Button */}
               <TouchableOpacity
                 className="ml-2"
                 onPress={() => navigation.navigate("FormDetails", { formId: item.id })} // Pass formId
               >
-                 <Ionicons name="ellipsis-vertical" size={28} color="#1e40af" />
+                <Ionicons name="ellipsis-vertical" size={28} color="#1e40af" />
               </TouchableOpacity>
             </View>
           )}
@@ -134,5 +154,4 @@ export function HomeScreen({ navigation }: { navigation: any }) {
   );
 }
 
-export default  HomeScreen;
-
+export default HomeScreen;

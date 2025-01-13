@@ -1,9 +1,9 @@
 import { Route, Routes, useLocation } from "react-router-dom";
-import PatientPage from "./pages/PatientPage";
+import ITRpage from "./pages/ITRpage";
 import ConsultationPage from "./pages/ConsultationPage";
 import Sidebar from "./Components/Sidebar";
 import LoginPage from "./pages/LoginPage";
-import DashboardExample from "./pages/DashboardPage";
+import Dashboard from "./pages/DashboardPage";
 import Createform from "./pages/CreateformPage";
 import FormPage from "./pages/FormPage";
 import ProtectedRoute from "./pages/ProtectedRoute";
@@ -30,15 +30,15 @@ function App() {
           path="/dashboardPage"
           element={
             <ProtectedRoute>
-              <PatientPage/>
+              <Dashboard/>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/patientPage"
+          path="/ITRpage"
           element={
             <ProtectedRoute>
-              <PatientPage />
+              <ITRpage />
             </ProtectedRoute>
           }
         />

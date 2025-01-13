@@ -1,14 +1,17 @@
 # accounts/views.py
+import random
 from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from accounts.serializers import CustomUserSerializer
-from .models import CustomUser
+from dynamic_auth import settings
+from .models import CustomUser, PasswordResetCode
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import make_password
 from django.shortcuts import get_object_or_404
+from django.core.mail import send_mail
 
 class UserSignupView(APIView):
     permission_classes = [AllowAny]
@@ -161,3 +164,58 @@ class DeleteUserView(APIView):
             # Catch any other errors and log them
             print(f"Error deleting user: {e}")  # For debugging purposes
             return Response("Internal server error")
+        
+class ForgotPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        if not email:
+            return Response({"error": "Email is required."}, status=400)
+
+        try:
+            user = CustomUser.objects.get(email=email)
+            reset_code_value = str(random.randint(100000, 999999))
+            reset_code = PasswordResetCode.objects.create(user=user, code=reset_code_value)
+
+            send_mail(
+                subject="Password Reset Request",
+                message=f"Your password reset code is: {reset_code.code}",  # Use f-string here
+                from_email='hello@demomailtrap.com',
+                recipient_list=[email],
+                fail_silently=False,
+            )
+
+            return Response({"message": "Reset code sent to email."})
+        except CustomUser.DoesNotExist:
+            return Response({"error": "User not found."}, status=404)
+
+
+class ResetPasswordView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email')
+        code = request.data.get('code')
+        new_password = request.data.get('new_password')
+
+        if not all([email, code, new_password]):
+            return Response({"error": "All fields are required."}, status=400)
+
+        try:
+            user = CustomUser.objects.get(email=email)
+            reset_code = PasswordResetCode.objects.get(user=user, code=code)
+
+            if not reset_code.is_valid():
+                return Response({"error": "Reset code expired."}, status=400)
+
+            # Update password
+            user.password = make_password(new_password)
+            user.save()
+            reset_code.delete()  # Invalidate the reset code
+
+            return Response({"message": "Password reset successful."})
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Invalid email or reset code."}, status=404)
+        except PasswordResetCode.DoesNotExist:
+            return Response({"error": "Invalid reset code."}, status=404)

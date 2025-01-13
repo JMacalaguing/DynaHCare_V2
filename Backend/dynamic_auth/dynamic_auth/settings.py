@@ -150,3 +150,12 @@ REST_FRAMEWORK = {
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',  
 ]
+
+# Email settings for sending emails using MailerSend
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'live.smtp.mailtrap.io' 
+EMAIL_PORT = 587 
+EMAIL_HOST_USER = 'api'  
+EMAIL_HOST_PASSWORD = 'e2c5f47a773ee4610e2f02c50828e6b8'  
+EMAIL_USE_TLS = True 
+EMAIL_USE_SSL = False

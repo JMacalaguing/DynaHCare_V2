@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
 import config from './config';
+import { ClipboardList } from "lucide-react";
 
 // Function to export logbook data to CSV
 const exportToCSV = (data: { name: string; date: string }[]) => {
@@ -55,9 +56,15 @@ export default function ConsultationPage() {
 
   return (
     <div className="w-full bg-gradient-to-tr from-gray-100 via-blue-50 to-white flex flex-col">
-      <header className=" shadow-lg">
+      <header className="shadow-lg bg-white">
         <div className="container mx-auto flex justify-between items-center px-6 py-4">
-          <h1 className="text-3xl font-bold text-gray-800">Consultation LogBook</h1>
+          {/* Left Side: Icon and Title */}
+          <div className="flex items-center space-x-2">
+            <ClipboardList className="h-6 w-6 text-black" />
+            <span className="text-xl font-semibold text-black">Consultation LogBook</span>
+          </div>
+
+          {/* Right Side: Buttons */}
           <div className="flex space-x-4">
             <button
               onClick={clearData}

@@ -6,9 +6,9 @@ import config from "./config";
 import { Ionicons } from "@expo/vector-icons";
 import { createTable, saveData } from './database'; 
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Picker } from '@react-native-picker/picker';
 import { RadioButton } from 'react-native-paper';
 import CustomSelect from "./CustomSelect";
+import NetInfo from '@react-native-community/netinfo';
 
 
 interface Field {
@@ -54,31 +54,44 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
       try {
         const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/`);
         if (!response.ok) {
-          throw new Error("Failed to fetch form details.");
+          throw new Error('Failed to fetch form details.');
         }
+    
         const data = await response.json();
-
+    
         let parsedSchema;
-        if (data.schema && typeof data.schema === "string") {
+        if (data.schema && typeof data.schema === 'string') {
           const correctedSchema = data.schema.replace(/'/g, '"');
-          try {
-            parsedSchema = JSON.parse(correctedSchema);
-          } catch (error) {
-            console.error("Error parsing schema:", error);
-            parsedSchema = null;
-          }
-        } else if (data.schema && typeof data.schema === "object") {
-          parsedSchema = data.schema;
+          parsedSchema = JSON.parse(correctedSchema);
         } else {
-          console.warn("Invalid schema format or schema is undefined.");
-          parsedSchema = null;
-        }        
-
+          parsedSchema = data.schema || null;
+        }
+    
         setFormData({ ...data, schema: parsedSchema });
+    
+        // Save schema to AsyncStorage
+        await AsyncStorage.setItem(`form_${formId}_schema`, JSON.stringify({ ...data, schema: parsedSchema }));
+    
+        // Load previously saved form values
+        const savedValues = await AsyncStorage.getItem(`form_${formId}_values`);
+        if (savedValues) {
+          setFormValues(JSON.parse(savedValues));
+        }
       } catch (error) {
-        console.error("Error fetching form data:", error);
+        // Load schema and values from AsyncStorage when offline
+        const savedSchema = await AsyncStorage.getItem(`form_${formId}_schema`);
+        if (savedSchema) {
+          const localData = JSON.parse(savedSchema);
+          setFormData(localData);
+        }
+    
+        const savedValues = await AsyncStorage.getItem(`form_${formId}_values`);
+        if (savedValues) {
+          setFormValues(JSON.parse(savedValues));
+        }
       }
     }
+    
 
     fetchForm();
   }, [formId]);
@@ -113,6 +126,41 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
       },
     }));
   };
+
+   // Sync form data with server when online
+   async function syncFormData() {
+    try {
+      const savedValues = await AsyncStorage.getItem(`form_${formId}_values`);
+      if (savedValues) {
+        const formData = JSON.parse(savedValues);
+
+        const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/sync/`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+
+        if (response.ok) {
+          console.log("Form data synced with server successfully");
+          await AsyncStorage.removeItem(`form_${formId}_values`);
+        } else {
+          console.warn("Failed to sync form data with server.");
+        }
+      }
+    } catch (error) {
+      console.error("Error syncing form data:", error);
+    }
+  }
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      if (state.isConnected) {
+        syncFormData();
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   
 
