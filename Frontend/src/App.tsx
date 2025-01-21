@@ -12,6 +12,8 @@ import UserPage from "./pages/UserPage";
 import PatientList from "./pages/PatientList";
 import DynamicForm from "./pages/DynamicForm";
 import EditForm from "./pages/EditForm";
+import General_search from "./pages/General-search";
+
 
 function App() {
   const location = useLocation();
@@ -85,6 +87,8 @@ function App() {
         />
         <Route path="/patients" element={<PatientList />} />
         <Route path="/editForm" element={<EditForm formData={location.state?.formData} />} />
+        <Route path="/general-search" element={<General_search />} />
+        
       </Routes>
     </div>
   );

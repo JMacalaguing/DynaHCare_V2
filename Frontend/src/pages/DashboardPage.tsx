@@ -443,8 +443,7 @@ const fourthQuarterAverage = calculatePercentileAverage(quarterlyTotal.fourthQua
               </h2>
             </div>
         </div>
-          
-          </div>
+        </div>
           <div className="text-center flex items-center justify-center mb-6">
             <div className="rounded-full h-96 w-96 p-5 bg-gradient-to-t from-sky-400 to-emerald-300 flex items-center justify-center flex-col drop-shadow-lg">
               <p className="text-xl font-semibold text-blue-900 text-center">
@@ -455,9 +454,17 @@ const fourthQuarterAverage = calculatePercentileAverage(quarterlyTotal.fourthQua
               </h2>
             </div>
         </div> 
-      </main>
-
-
-    </div>
+        <div>
+        <div className="text-center flex items-center justify-center mb-6">
+          <div className="h-96 w-full p-5 bg-gradient-to-t from-sky-400 to-emerald-300 flex items-center justify-center flex-col drop-shadow-lg">
+              <p className="text-xl font-semibold text-blue-900 text-center">
+              </p>
+              <h2 className="text-7xl font-bold text-blue-900">
+              </h2>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
   );
 }
