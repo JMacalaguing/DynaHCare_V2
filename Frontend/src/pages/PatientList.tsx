@@ -96,7 +96,8 @@ export default function PatientList() {
 
   const exportToPDF = () => {
     const margin = 10;
-    const rowHeight = 10;
+    const rowHeight = 12;
+    const cellPadding = 2; // Padding inside cells
   
     // Calculate dynamic width based on the number of fields
     const minColumnWidth = 40; // Minimum width for each column
@@ -110,7 +111,7 @@ export default function PatientList() {
     const headerHeight = rowHeight;
     const rowsHeight = responses.length * rowHeight;
     const totalHeight = Math.max(
-      297, // Default A4 height in mm
+      297,
       titleHeight + headerHeight + rowsHeight + margin * 2
     );
   
@@ -128,19 +129,33 @@ export default function PatientList() {
     doc.text(`Responses for: ${form.title}`, x, y);
     y += 10;
   
-    // Render headers
+    // Render headers with background color, borders, and bold text
+    doc.setFont("helvetica", "bold"); // Set font to bold
     doc.setFontSize(10);
     filteredFields.forEach((header) => {
       const columnWidth = (customWidth - margin * 2) / filteredFields.length;
-      doc.rect(x, y, columnWidth, rowHeight);
-      const lines = doc.splitTextToSize(header, columnWidth - 2);
-      doc.text(lines, x + 1, y + 6);
+  
+      // Set header background color
+      doc.setFillColor(220, 220, 220); // RGB color for light gray
+      doc.rect(x, y, columnWidth, rowHeight, "F"); // Fill the rectangle
+  
+      // Draw header border
+      doc.setDrawColor(0, 0, 0); // Black border
+      doc.setLineWidth(0.2); // Thin border line
+      doc.rect(x, y, columnWidth, rowHeight); // Draw border
+  
+      // Add header text (bold)
+      const lines = doc.splitTextToSize(header, columnWidth - cellPadding * 2);
+      doc.setTextColor(0, 0, 0); // Set text color to black
+      doc.text(lines, x + cellPadding, y + cellPadding + 4); // Add padding
+  
       x += columnWidth;
     });
   
     y += rowHeight;
   
     // Render rows
+    doc.setFont("helvetica", "normal"); // Reset font to normal
     responses.forEach((response) => {
       x = margin;
       filteredFields.forEach((field) => {
@@ -160,9 +175,9 @@ export default function PatientList() {
             .join(", ") || "N/A";
         }
   
-        doc.rect(x, y, columnWidth, rowHeight);
-        const lines = doc.splitTextToSize(value, columnWidth - 2);
-        doc.text(lines, x + 1, y + 6);
+        doc.rect(x, y, columnWidth, rowHeight); // Draw cell border
+        const lines = doc.splitTextToSize(value, columnWidth - cellPadding * 2);
+        doc.text(lines, x + cellPadding, y + cellPadding + 4); // Add padding
         x += columnWidth;
       });
       y += rowHeight;
@@ -171,7 +186,7 @@ export default function PatientList() {
     // Save the PDF
     doc.save(`${form.title}_responses.pdf`);
   };
-
+  
   const exportToExcel = () => {
     const rows = responses.map((response) => {
       const row: Record<string, any> = {

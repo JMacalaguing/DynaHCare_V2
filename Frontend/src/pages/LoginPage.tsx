@@ -36,7 +36,7 @@ function LoginPage() {
       if (err instanceof AxiosError && err.response) {
         setError(err.response.data?.error || "Invalid email or password");
       } else {
-        setError("An unexpected error occurred.");
+        setError("DynaHcare Login Connection is Offline");
       }
     } finally {
       setLoading(false);

@@ -125,7 +125,7 @@ export default function Home() {
           onClick={() => navigate("/general-search")}
           className="bg-gradient-to-t from-sky-400 to-emerald-300 text-white px-6 py-3 rounded-lg shadow-lg hover:bg-emerald-600 transition-all"
         >
-          General Record
+          Patient General Record
         </Button>
             <CalendarDays color="black" fill="white" />
             <span className="font-medium text-black">{currentDate}</span>
