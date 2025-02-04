@@ -134,6 +134,7 @@ export function Consultation({ navigation }: { navigation: any }) {
                 value={date || new Date()}
                 mode="date"
                 display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                minimumDate={new Date()} 
                 onChange={onChangeDate}
               />
             )}

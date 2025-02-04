@@ -39,7 +39,6 @@ const FormInputPage = () => {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false); // State for success modal
   const navigate = useNavigate();
 
-  // Fetch the form data
   useEffect(() => {
     const fetchForm = async () => {
       try {
@@ -47,8 +46,29 @@ const FormInputPage = () => {
         if (!response.ok) {
           throw new Error("Failed to fetch form details.");
         }
+        
         const data = await response.json();
-        let parsedSchema = typeof data.schema === "string" ? JSON.parse(data.schema.replace(/'/g, '"')) : data.schema;
+  
+        let parsedSchema;
+        if (typeof data.schema === "string") {
+          try {
+            parsedSchema = JSON.parse(data.schema); // Try parsing directly
+          } catch (innerError) {
+            console.error("Error parsing schema, attempting fix:", innerError);
+            
+            // Attempt to fix JSON formatting issues before parsing
+            let fixedSchema = data.schema
+              .replace(/\r?\n|\r/g, '') // Remove newlines
+              .replace(/\t/g, '') // Remove tabs
+              .replace(/,\s*]/g, ']') // Fix trailing commas in arrays
+              .replace(/,\s*}/g, '}'); // Fix trailing commas in objects
+  
+            parsedSchema = JSON.parse(fixedSchema);
+          }
+        } else {
+          parsedSchema = data.schema;
+        }
+  
         setFormData({ ...data, schema: parsedSchema });
       } catch (error) {
         console.error("Error fetching form data:", error);
@@ -326,6 +346,24 @@ const FormInputPage = () => {
                         ))
                       : null}
                   </div>
+                ) : field.type === "select" ? (
+                  <select
+                    id={fieldId}
+                    required={field.required}
+                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
+                    value={formValues[section.sectionname]?.[field.label.trim()] || ""}
+                    onChange={(e) =>
+                      handleInputChange(section.sectionname, field.label.trim(), e.target.value)
+                    }
+                  >
+                    <option value="">Select an option</option>
+                    {Array.isArray(field.options) &&
+                      field.options.map((option: string, index: number) => (
+                        <option key={index} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                  </select>
                 ) : null}
               </div>
             );

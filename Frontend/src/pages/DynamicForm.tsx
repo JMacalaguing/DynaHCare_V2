@@ -251,7 +251,7 @@ const DynamicForm: React.FC<DynamicFormProps> = ({ template }) => {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xl">Form Name</FormLabel>
-                <FormDescription className="text-md">This is your Form Name.</FormDescription>
+                <FormDescription className="text-md">Form Name.</FormDescription>
                 <FormControl>
                   <Input placeholder="Title . . ." className="w-full h-12 text-md" {...field} />
                 </FormControl>

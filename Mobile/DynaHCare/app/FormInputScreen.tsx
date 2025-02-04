@@ -9,6 +9,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RadioButton } from 'react-native-paper';
 import CustomSelect from "./CustomSelect";
 import NetInfo from '@react-native-community/netinfo';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
 
 interface Field {
@@ -47,6 +48,8 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
   const [isSaveLocalModalOpen, setIsSaveLocalModalOpen] = useState(false);
   const [isSubmitlocalSuccessModalOpen, setIsSubmitlocalSuccessModalOpen] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false); // State to manage date picker visibility
+  const [currentDateField, setCurrentDateField] = useState<{ sectionName: string; fieldLabel: string } | null>(null);
 
 
   useEffect(() => {
@@ -54,23 +57,47 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
       try {
         const response = await fetch(`${config.BASE_URL}/formbuilder/api/forms/${formId}/`);
         if (!response.ok) {
-          throw new Error('Failed to fetch form details.');
+          throw new Error(`Failed to fetch form details: ${response.status} ${response.statusText}`);
         }
     
         const data = await response.json();
+        console.log("Received raw response data:", data); // Debugging log to inspect the data structure
     
-        let parsedSchema;
-        if (data.schema && typeof data.schema === 'string') {
-          const correctedSchema = data.schema.replace(/'/g, '"');
-          parsedSchema = JSON.parse(correctedSchema);
+        let form;
+        if (Array.isArray(data) && data.length > 0) {
+          form = data[0]; // Extract first form object if it's an array
+          console.log("Extracted form data from array:", form); // Debugging log
+        } else if (typeof data === 'object') {
+          form = data; // Treat the response as an object directly
+          console.log("Received form object:", form); // Debugging log
         } else {
-          parsedSchema = data.schema || null;
+          throw new Error('Invalid data format: Expected an array or object.');
         }
     
-        setFormData({ ...data, schema: parsedSchema });
+        let parsedSchema;
+        if (typeof form.schema === "string") {
+          try {
+            parsedSchema = JSON.parse(form.schema); // Try parsing the schema directly
+          } catch (innerError) {
+            console.error("Error parsing schema, attempting fix:", innerError);
+    
+            // Attempt to fix JSON formatting issues before parsing
+            let fixedSchema = form.schema
+              .replace(/\r?\n|\r/g, '') // Remove newlines
+              .replace(/\t/g, '') // Remove tabs
+              .replace(/,\s*]/g, ']') // Fix trailing commas in arrays
+              .replace(/,\s*}/g, '}'); // Fix trailing commas in objects
+    
+            parsedSchema = JSON.parse(fixedSchema);
+          }
+        } else {
+          parsedSchema = form.schema;
+        }
+    
+        setFormData({ ...form, schema: parsedSchema });
     
         // Save schema to AsyncStorage
-        await AsyncStorage.setItem(`form_${formId}_schema`, JSON.stringify({ ...data, schema: parsedSchema }));
+        await AsyncStorage.setItem(`form_${formId}_schema`, JSON.stringify({ ...form, schema: parsedSchema }));
     
         // Load previously saved form values
         const savedValues = await AsyncStorage.getItem(`form_${formId}_values`);
@@ -78,6 +105,8 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
           setFormValues(JSON.parse(savedValues));
         }
       } catch (error) {
+        console.error("Error fetching form data:", error);
+    
         // Load schema and values from AsyncStorage when offline
         const savedSchema = await AsyncStorage.getItem(`form_${formId}_schema`);
         if (savedSchema) {
@@ -92,7 +121,7 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
       }
     }
     
-
+    
     fetchForm();
   }, [formId]);
 
@@ -293,6 +322,16 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
       </View>
     );
   }
+
+  const handleDateChange = (event: any, selectedDate?: Date) => {
+    if (selectedDate && currentDateField) {
+      const { sectionName, fieldLabel } = currentDateField;
+      const formattedDate = selectedDate.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+      handleInputChange(sectionName, fieldLabel, formattedDate);
+    }
+    setDatePickerVisible(false); // Close picker
+  };
+  
   
   return (
       <View className="flex-1 bg-blue-100 pb-5">
@@ -331,7 +370,7 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
                   {field.description}
                 </Text>
               )}
-              {field.type === "text" || field.type === "number" || field.type === "email" || field.type === "date" ? (
+              {field.type === "text" || field.type === "number" || field.type === "email" ? (
                 <TextInput
                   className="w-full p-3 border border-gray-300 rounded-md"
                   keyboardType={field.type === "number" ? "numeric" : "default"}
@@ -340,7 +379,34 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
                     : formValues[sectionName]?.[fieldLabel] || ""}
                   onChangeText={(value) => handleInputChange(sectionName, fieldLabel, value)}
                 />
-              ) : field.type === "checkbox-group" ? (
+              ) : field.type === "date" ? (
+                <View>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setCurrentDateField({ sectionName, fieldLabel });
+                      setDatePickerVisible(true);
+                    }}
+                  >
+                    <TextInput
+                      className="w-full p-3 border border-gray-300 rounded-md"
+                      value={Array.isArray(formValues[sectionName]?.[fieldLabel])
+                        ? formValues[sectionName]?.[fieldLabel].join(", ")
+                        : formValues[sectionName]?.[fieldLabel] || ""}
+                      editable={false} // Prevent manual entry
+                      placeholder="Select a date"
+                    />
+                  </TouchableOpacity>
+                  
+                  {datePickerVisible && currentDateField?.fieldLabel === fieldLabel && (
+                    <DateTimePicker
+                      value={new Date()}
+                      mode="date"
+                      display="default"
+                      onChange={handleDateChange}
+                    />
+                  )}
+                </View>
+              )  : field.type === "checkbox-group" ? (
                 <View>
                   {parseOptions(field.options).map((option, index) => (
                     <View key={index} className="flex-row items-center mb-2">
@@ -472,6 +538,7 @@ const FormInputScreen = ({ navigation }: { navigation: any }) => {
             </View>
           </View>
         </Modal>
+
     </ScrollView>
     </View>
   );

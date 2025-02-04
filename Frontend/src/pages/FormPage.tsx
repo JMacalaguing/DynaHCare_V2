@@ -17,8 +17,7 @@ import { Input } from "../Components/ui/input";
 import { Card, CardContent } from "../Components/ui/card";
 import { useNavigate } from "react-router-dom";
 import config from "./config";
-
-
+import { PatientInformationCard } from "@/Components/PatientInformationCard";
 
 
 // Modal Component
@@ -60,6 +59,7 @@ function Modal2({ isOpen, onClose, title}: { isOpen: boolean; onClose: () => voi
   );
 }
 
+
 // Zod schema for validation
 const FormSchema = z.object({
   formname: z.string().min(2, {
@@ -94,7 +94,16 @@ export default function FormBuilder({ formId }: { formId?: number }) {
     defaultValues: {
       formname: "",
       description: "",  // Default value for description
-      sections: [{ sectionname: "", fields: [] }],
+      sections: [
+        {
+          sectionname: "Patient Information",
+          fields: [
+            { label: "Name", type: "text", required: true, description: "Full name of the patient, (Last Name, First Name,MI)",  },
+            { label: "Date of Birth", type: "date", required: true, description: "The patient's date of birth.", },
+            { label: "Sex", type: "select", options: "M,F", required: true, description: " Male or Female.",},
+          ],
+        },
+      ],
     },
   });
 
@@ -214,7 +223,17 @@ export default function FormBuilder({ formId }: { formId?: number }) {
     form.reset({
       formname: "",
       description: "",  // Reset description
-      sections: [{ sectionname: "", fields: [] }],
+      sections: [
+        {
+          sectionname: "Patient Information",
+
+          fields: [
+            { label: "Name", type: "text", required: true },
+            { label: "Date of Birth", type: "date", required: true },
+            { label: "Sex", type: "select", options: "M, F", required: true },
+          ],
+        },
+      ],
     });
   };
 
@@ -271,7 +290,16 @@ export default function FormBuilder({ formId }: { formId?: number }) {
         form.reset({
         formname: "",
         description: "",  // Reset description
-        sections: [{ sectionname: "", fields: [] }],
+        sections: [
+          {
+            sectionname: "Patient Information",
+            fields: [
+              { label: "Name", type: "text",description:"Last Name,First Name", required: true },
+              { label: "Date of Birth", type: "date", required: true },
+              { label: "Sex", type: "select",options: "M,F", required: true },
+            ],
+          },
+        ],
       });
       } else {
         // Debug: Log the response status if it's not OK
@@ -287,7 +315,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setTemplateName(e.target.value);
   };
-
+ 
   return (
     <div className="w-full h-full flex flex-col gap-8 justify-center items-center text-black ">
       <Form {...form}>
@@ -301,7 +329,6 @@ export default function FormBuilder({ formId }: { formId?: number }) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel className="text-xl">Form Name</FormLabel>
-                <FormDescription className="text-md">This is your Form Name.</FormDescription>
                 <FormControl>
                   <Input placeholder="Title . . ." className="w-full h-12 text-md" {...field} />
                 </FormControl>
@@ -328,7 +355,6 @@ export default function FormBuilder({ formId }: { formId?: number }) {
               </FormItem>
             )}
           />
-
           {sections.map((section, sectionIndex) => (
             <Card key={sectionIndex}>
               <CardContent className="p-7 flex flex-col justify-center">
@@ -346,14 +372,16 @@ export default function FormBuilder({ formId }: { formId?: number }) {
                       </FormItem>
                     )}
                   />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="p-2"
-                    onClick={() => removeSection(sectionIndex)}
-                  >
-                    <Trash2 className="h-5 w-5 text-red-500" />
-                  </Button>
+                {section.sectionname !== "Patient Information" && sectionIndex !== 0 && (
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            className="p-2"
+                            onClick={() => removeSection(sectionIndex)}
+                          >
+                            <Trash2 className="h-5 w-5 text-red-500" />
+                          </Button>
+                        )}
                 </div>
 
                 <FieldArray sectionIndex={sectionIndex} control={form.control} />
@@ -441,7 +469,7 @@ export default function FormBuilder({ formId }: { formId?: number }) {
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormControl>
-                          <Input placeholder="Field Label" {...field} className="w-full h-12 text-md" />
+                          <Input placeholder="Field Label" {...field} className="w-full h-12 text-md"   />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
