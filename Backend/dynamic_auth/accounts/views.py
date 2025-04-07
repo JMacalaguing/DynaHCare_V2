@@ -180,7 +180,7 @@ class ForgotPasswordView(APIView):
 
             send_mail(
                 subject="Password Reset Request",
-                message=f"Your password reset code is: {reset_code.code}",  # Use f-string here
+                message=f"Your password reset code is: {reset_code.code}", 
                 from_email='hello@demomailtrap.com',
                 recipient_list=[email],
                 fail_silently=False,

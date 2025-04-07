@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-&^(02@ahovap_h-ptgzk5^jg!)fl11832g+el&fqvt2s1j$q9_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['192.168.1.2', 'http://localhost:5173/','192.168.1.3','192.168.1.10','192.168.133.178','192.168.14.178']
+ALLOWED_HOSTS = ['192.168.1.3', 'http://localhost:5173/','192.168.1.3','192.168.1.10','192.168.133.178','192.168.14.178']
 
 # Application definition
 
@@ -147,9 +147,7 @@ REST_FRAMEWORK = {
     ),
 }
 
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',  
-]
+AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 # Email settings for sending emails using MailerSend
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
